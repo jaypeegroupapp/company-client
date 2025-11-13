@@ -1,6 +1,13 @@
 "use client";
 
-import { Home, Calendar, Users, MenuIcon, Truck } from "lucide-react";
+import {
+  Home,
+  Calendar,
+  Users,
+  MenuIcon,
+  Truck,
+  PackageCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -9,7 +16,7 @@ import clsx from "clsx";
 const navItems = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Trucks", href: "/trucks", icon: Truck },
-  // { name: "Clients", href: "/clients", icon: Users },
+  { name: "Orders", href: "/orders", icon: PackageCheck },
   // { name: "Menu", href: "/menu", icon: MenuIcon },
 ];
 
