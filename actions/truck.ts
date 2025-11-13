@@ -120,6 +120,7 @@ export async function createTruckAction(
   revalidatePath("/trucks");
   redirect("/trucks");
 }
+
 export async function deleteTruckAction(truckId: string) {
   try {
     await deleteTruckService(truckId);

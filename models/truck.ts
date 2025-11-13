@@ -25,6 +25,11 @@ const TruckSchema: Schema<ITruckDoc> = new Schema(
     model: { type: String },
     year: { type: Number },
     isActive: { type: Boolean, default: true },
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: Company.modelName,
+      required: true,
+    },
     userId: {
       type: Schema.Types.ObjectId,
       ref: User.modelName,

@@ -15,11 +15,13 @@ export async function createTruckService(data: ITruck) {
   if (!session) return null;
 
   const userId = session?.userId as string;
+  const companyId = session?.companyId as string;
 
   try {
     const truck = await Truck.create({
       ...data,
       userId: new Types.ObjectId(userId),
+      companyId: new Types.ObjectId(companyId),
     });
     return JSON.parse(JSON.stringify(truck));
   } catch (error: any) {
