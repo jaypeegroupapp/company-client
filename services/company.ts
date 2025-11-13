@@ -6,11 +6,12 @@ import { Types } from "mongoose";
 // ✅ Create a new company
 export async function createCompanyService(data: Partial<ICompany>) {
   await connectDB();
-  const company = await Company.create({
+  const company = (await Company.create({
     ...data,
     userId: new Types.ObjectId(data.userId),
-  });
-  return company;
+  })) as any;
+  
+  return company._id.toString();
 }
 
 // ✅ Update existing company

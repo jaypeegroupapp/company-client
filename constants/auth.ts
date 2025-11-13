@@ -15,12 +15,6 @@ const adminUser = {
 
 export const registerFormData = [
   {
-    name: "name",
-    label: "Company Name",
-    placeholder: "Enter company name",
-    isRequired: true,
-  },
-  {
     name: "email",
     label: "Email",
     type: "email",

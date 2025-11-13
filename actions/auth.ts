@@ -27,7 +27,7 @@ export async function regsiterUser(
     return state;
   }
 
-  const { email, name, password } = validatedFields.data;
+  const { email, password } = validatedFields.data;
 
   try {
     const isUserExist = await isUserExists(email);
@@ -45,11 +45,16 @@ export async function regsiterUser(
 
   try {
     const user = await createUser(email, hashedPassword);
-    await createSession(user.id);
+    await createSession({ userId: user.id });
     await setCookie("registrationStep", "0");
   } catch (error) {
     throw new Error("Error creating company:" + error);
   }
 
   redirect("/register/company");
+}
+
+export async function logout() {
+  await deleteSession();
+  redirect("/login");
 }

@@ -1,13 +1,12 @@
 // /actions/company.ts
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { companyFormSchema } from "@/validations/company";
 import { createCompanyService } from "@/services/company";
 import { uploadDoc, uploadFile } from "./file";
 import { verifySession } from "@/lib/dal";
-import { setCookie } from "@/lib/session";
+import { createSession, setCookie } from "@/lib/session";
 
 export async function registerCompanyAction(
   prevState: any,
@@ -53,7 +52,7 @@ export async function registerCompanyAction(
 
     const userId = session?.userId as string;
 
-    await createCompanyService({
+    const companyId = await createCompanyService({
       companyName,
       registrationNumber,
       contactEmail,
@@ -63,6 +62,9 @@ export async function registerCompanyAction(
       invoiceFile: fileId,
       userId,
     });
+
+    await createSession({ userId, companyId });
+
     await setCookie("registrationStep", "1");
   } catch (error: any) {
     console.error("❌ registerCompanyAction error:", error);

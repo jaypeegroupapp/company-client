@@ -1,14 +1,14 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import fs from "fs";
-import path from "path";
-import { randomUUID } from "crypto";
+// import fs from "fs";
+// import path from "path";
+// import { randomUUID } from "crypto";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export async function fileUpload(file: File | null) {
+/* export async function fileUpload(file: File | null) {
   let fileUrl = "";
 
   if (file && file.size > 0) {
@@ -34,3 +34,4 @@ export async function fileUpload(file: File | null) {
     fileUrl = `/uploads/${filename}`;
   }
 }
+ */

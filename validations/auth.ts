@@ -2,11 +2,6 @@ import { z } from "zod";
 
 export const registerUserformSchema = z
   .object({
-    name: z
-      .string()
-      .trim()
-      .min(3, "company name must be at least 3 characters")
-      .regex(/^\S+$/, "company name must not contain spaces"),
     email: z.email(),
     password: z
       .string()
@@ -34,7 +29,6 @@ export type RegisterUserForm = z.infer<typeof registerUserformSchema>;
 
 export type RegisterUserState = {
   errors?: {
-    username?: string[];
     email?: string[];
     password?: string[];
     confirmPassword?: string[];
@@ -68,5 +62,6 @@ export type LoginUserState = {
 
 export type SessionPayload = {
   userId: string;
+  companyId?: string;
   expiresAt: Date;
 };
