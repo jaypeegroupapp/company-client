@@ -37,8 +37,8 @@ const InputValidated = ({
           type={
             type === "password" && !show
               ? "password"
-              : type !== ""
-              ? type
+              : type === "number"
+              ? "number"
               : "text"
           }
           disabled={isPending}
