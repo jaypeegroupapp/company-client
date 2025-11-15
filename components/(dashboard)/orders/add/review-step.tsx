@@ -25,7 +25,7 @@ export function ReviewStep({
 
   const total = selectedTrucks.reduce((acc, truck) => {
     const qty = quantities[truck.id] || 0;
-    return acc + qty * selectedProduct.price;
+    return acc + qty * selectedProduct.sellingPrice;
   }, 0);
 
   const totalLitres = Object.values(quantities).reduce(

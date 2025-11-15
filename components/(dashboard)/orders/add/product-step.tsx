@@ -41,7 +41,7 @@ export function ProductStep({
             <h3 className="font-medium text-gray-900">{product.name}</h3>
             <p className="text-sm text-gray-500 mt-1">{product.description}</p>
             <p className="text-sm font-semibold mt-2 text-gray-700">
-              R {product.price.toFixed(2)}
+              R {product.sellingPrice.toFixed(2)}
             </p>
           </motion.div>
         ))}
