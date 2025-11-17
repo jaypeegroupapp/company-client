@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getTrucks } from "@/data/truck";
+
+import { TruckSearchInput } from "./search";
+import { TruckSelectAll } from "./select-all";
+import { TruckList } from "./list";
+import { TruckPagination } from "./pagination";
 
 export function TruckStep({
   selectedTrucks,
@@ -15,6 +20,10 @@ export function TruckStep({
   onBack: () => void;
 }) {
   const [trucks, setTrucks] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const PAGE_SIZE = 6;
 
   useEffect(() => {
     async function loadTrucks() {
@@ -24,6 +33,47 @@ export function TruckStep({
     loadTrucks();
   }, []);
 
+  // FILTERED
+  const filteredTrucks = useMemo(() => {
+    return trucks.filter((t) => {
+      const target =
+        `${t.plateNumber} ${t.registrationNumber} ${t.make} ${t.model}`.toLowerCase();
+      return target.includes(search.toLowerCase());
+    });
+  }, [trucks, search]);
+
+  // PAGINATION
+  const totalPages = Math.ceil(filteredTrucks.length / PAGE_SIZE);
+
+  const paginatedTrucks = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredTrucks.slice(start, start + PAGE_SIZE);
+  }, [filteredTrucks, page]);
+
+  // SELECT ALL
+  const allSelected = paginatedTrucks.every((t) =>
+    selectedTrucks.some((x) => x.id === t.id)
+  );
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedTrucks(
+        selectedTrucks.filter(
+          (x) => !paginatedTrucks.some((t) => t.id === x.id)
+        )
+      );
+    } else {
+      const newTrucks = [
+        ...selectedTrucks,
+        ...paginatedTrucks.filter(
+          (t) => !selectedTrucks.some((x) => x.id === t.id)
+        ),
+      ];
+      setSelectedTrucks(newTrucks);
+    }
+  };
+
+  // SELECT SINGLE TRUCK
   const toggleTruck = (truck: any) => {
     if (selectedTrucks.some((t) => t.id === truck.id)) {
       setSelectedTrucks(selectedTrucks.filter((t) => t.id !== truck.id));
@@ -35,35 +85,27 @@ export function TruckStep({
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Select Trucks</h2>
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {trucks.map((t) => (
-          <label
-            key={t.id}
-            className={`flex items-center gap-3 border p-4 rounded-xl cursor-pointer transition ${
-              selectedTrucks.some((x) => x.id === t.id)
-                ? "border-gray-800 bg-gray-100"
-                : "border-gray-300"
-            }`}
-          >
-            <input
-              type="checkbox"
-              checked={selectedTrucks.some((x) => x.id === t.id)}
-              onChange={() => toggleTruck(t)}
-              className="accent-gray-800"
-            />
-            <div>
-              <p className="font-medium text-gray-900">{t.plateNumber}</p>
-              <p className="text-sm text-gray-500">
-                {t.make} {t.model}
-              </p>
-              <p className="text-xs text-gray-400 mt-1">
-                Reg: {t.registrationNumber}
-              </p>
-            </div>
-          </label>
-        ))}
-      </div>
 
+      <TruckSearchInput
+        search={search}
+        setSearch={setSearch}
+        setPage={setPage}
+      />
+
+      <TruckSelectAll
+        allSelected={allSelected}
+        toggleSelectAll={toggleSelectAll}
+      />
+
+      <TruckList
+        trucks={paginatedTrucks}
+        selectedTrucks={selectedTrucks}
+        toggleTruck={toggleTruck}
+      />
+
+      <TruckPagination page={page} totalPages={totalPages} setPage={setPage} />
+
+      {/* Footer */}
       <div className="pt-6 flex justify-between">
         <button
           onClick={onBack}
@@ -71,6 +113,7 @@ export function TruckStep({
         >
           Back
         </button>
+
         <button
           disabled={selectedTrucks.length === 0}
           onClick={onNext}
