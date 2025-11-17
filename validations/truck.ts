@@ -7,11 +7,15 @@ export const truckFormSchema = z.object({
   vinNumber: z.string().min(3, "VIN number is required"),
   make: z.string().optional(),
   model: z.string().optional(),
-  year: z
+  year: z.coerce
     .string()
     .optional()
     .transform((val) => (val ? parseInt(val, 10) : undefined))
     .refine((val) => !val || val >= 1900, "Invalid year"),
+  tankSize: z.coerce
+    .string()
+    .min(1, "Tank size is required")
+    .transform((val) => (val ? parseFloat(val) : undefined)),
   colour: z.string().optional(),
 });
 

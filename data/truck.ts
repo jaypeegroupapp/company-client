@@ -16,6 +16,7 @@ export async function getTrucks() {
       make: truck.make,
       model: truck.model,
       year: truck.year,
+      tankSize: truck.tankSize,
       isActive: truck.isActive,
       userId: truck.userId,
     }));

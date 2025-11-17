@@ -31,6 +31,12 @@ export const truckInputFormData = [
     type: "number",
   },
   {
+    name: "tankSize",
+    label: "Tank Size",
+    placeholder: "e.g. 50",
+    type: "number",
+  },
+  {
     name: "colour",
     label: "Colour",
     placeholder: "e.g. Black",

@@ -42,7 +42,8 @@ export default function TruckAddForm({
       vinNumber: truck?.vinNumber || "",
       make: truck?.make || "",
       model: truck?.model || "",
-      year: truck?.year || "",
+      year: truck?.year || 0,
+      tankSize: truck?.tankSize || "",
       colour: truck?.colour || "",
     },
   });

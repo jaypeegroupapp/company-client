@@ -21,6 +21,7 @@ const TruckSchema: Schema<ITruckDoc> = new Schema(
       trim: true,
     },
     colour: { type: String },
+    tankSize: { type: Number, min: 0, required: true },
     make: { type: String },
     model: { type: String },
     year: { type: Number },
