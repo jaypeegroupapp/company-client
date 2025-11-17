@@ -6,7 +6,13 @@ import { IOrder } from "@/definitions/order";
 import { OrderStatusBadge } from "./status-badge";
 import { EditCollectionDateModal } from "./edit-collection-date-modal";
 
-export function OrderSummary({ order }: { order: IOrder }) {
+export function OrderSummary({
+  order,
+  isWithin48Hours,
+}: {
+  order: IOrder;
+  isWithin48Hours: boolean;
+}) {
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -33,8 +39,20 @@ export function OrderSummary({ order }: { order: IOrder }) {
           <div>
             {order.status === "pending" && (
               <button
-                onClick={() => setShowModal(true)}
-                className="flex items-center gap-2 rounded-lg p-2 text-sm font-medium bg-gray-900 text-white hover:bg-gray-700 transition"
+                onClick={() => !isWithin48Hours && setShowModal(true)}
+                disabled={isWithin48Hours}
+                title={
+                  isWithin48Hours
+                    ? "Rescheduling is locked within 48 hours of collection."
+                    : "Reschedule your collection date"
+                }
+                className={`flex items-center gap-2 rounded-lg p-2 text-sm font-medium transition
+                  ${
+                    isWithin48Hours
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gray-900 text-white hover:bg-gray-700"
+                  }
+                `}
               >
                 <Calendar size={16} />
                 <div className="md:block hidden">Reschedule Collection</div>
@@ -42,6 +60,11 @@ export function OrderSummary({ order }: { order: IOrder }) {
             )}
           </div>
         </div>
+        {/* ❗ Disclaimer */}
+        <p className="text-xs text-red-700 text-center">
+          * Rescheduling or cancelling a collection is only allowed up to 48
+          hours before the collection date.
+        </p>
 
         <div className="border-t border-gray-200 my-4" />
 

@@ -12,6 +12,8 @@ import { OrderItemsList } from "./item-list";
 export function OrderDetailsClient({ order }: { order: IOrder }) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const isWithin48Hours =
+    new Date(order.collectionDate).getTime() - Date.now() < 48 * 60 * 60 * 1000;
 
   return (
     <motion.div
@@ -24,9 +26,10 @@ export function OrderDetailsClient({ order }: { order: IOrder }) {
         order={order}
         onBack={() => router.back()}
         onDelete={() => setShowDeleteModal(true)}
+        isWithin48Hours={isWithin48Hours}
       />
 
-      <OrderSummary order={order} />
+      <OrderSummary order={order} isWithin48Hours={isWithin48Hours} />
 
       {/* 🧩 Order Items Section */}
       <OrderItemsList items={order.items || []} />
