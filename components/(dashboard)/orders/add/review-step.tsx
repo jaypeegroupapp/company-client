@@ -42,7 +42,7 @@ export function ReviewStep({
   }
 
   const sellingPrice = selectedProduct.sellingPrice ?? 0;
-  const purchasePrice = selectedProduct.costPrice ?? 0;
+  const purchasePrice = selectedProduct.purchasePrice ?? 0;
 
   const getQuantity = (truckId?: string) =>
     truckId ? Number(quantities?.[truckId] || 0) : 0;
