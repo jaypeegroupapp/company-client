@@ -1,4 +1,5 @@
 "use client";
+import { ITruck } from "@/definitions/truck";
 
 export function QuantityStep({
   selectedTrucks,
@@ -7,7 +8,7 @@ export function QuantityStep({
   onNext,
   onBack,
 }: {
-  selectedTrucks: any[];
+  selectedTrucks: ITruck[];
   quantities: { [truckId: string]: number };
   setQuantities: (q: any) => void;
   onNext: () => void;
@@ -20,7 +21,7 @@ export function QuantityStep({
     });
   };
 
-  const buildOptions = (tankSize: number) => {
+  const buildOptions = (tankSize?: number) => {
     if (!tankSize) return [];
 
     const full = tankSize;
@@ -34,9 +35,12 @@ export function QuantityStep({
     ];
   };
 
-  const canContinue = selectedTrucks.every(
-    (truck) => quantities[truck.id] && quantities[truck.id] > 0
-  );
+  const canContinue = selectedTrucks.every((truck) => {
+    if (!truck.id) return false;
+
+    const quantity = quantities[truck.id];
+    return typeof quantity === "number" && quantity > 0;
+  });
 
   return (
     <div className="space-y-6">
@@ -45,12 +49,16 @@ export function QuantityStep({
       </h2>
 
       <div className="space-y-4">
-        {selectedTrucks.map((truck) => {
+        {selectedTrucks.map((truck, index) => {
           const options = buildOptions(truck.tankSize);
+          const truckId = truck.id;
+          const quantity = truckId ? quantities[truckId] : undefined;
+          const selectValue =
+            typeof quantity === "number" ? String(quantity) : "";
 
           return (
             <div
-              key={truck.id}
+              key={truckId ?? `truck-${index}`}
               className="border border-gray-200 rounded-xl p-4 flex justify-between items-center"
             >
               {/* LEFT — Truck Details */}
@@ -67,8 +75,11 @@ export function QuantityStep({
 
               {/* RIGHT — Dropdown Quantity */}
               <select
-                value={quantities[truck.id] || ""}
-                onChange={(e) => handleQuantityChange(truck.id, e.target.value)}
+                value={selectValue}
+                onChange={(e) =>
+                  truckId && handleQuantityChange(truckId, e.target.value)
+                }
+                disabled={!truckId}
                 className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-700"
               >
                 <option value="">Select Litres</option>

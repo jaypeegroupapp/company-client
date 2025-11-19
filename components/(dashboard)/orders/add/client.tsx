@@ -7,11 +7,13 @@ import { ProductStep } from "./product-step";
 import { TruckStep } from "./truck-step";
 import { QuantityStep } from "./quantity-step";
 import { ReviewStep } from "./review-step";
+import { IProduct } from "@/definitions/product";
+import { ITruck } from "@/definitions/truck";
 
 export default function AddOrderClient() {
   const [step, setStep] = useState(1);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [selectedTrucks, setSelectedTrucks] = useState<any[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+  const [selectedTrucks, setSelectedTrucks] = useState<ITruck[]>([]);
   const [quantities, setQuantities] = useState<{ [truckId: string]: number }>(
     {}
   );

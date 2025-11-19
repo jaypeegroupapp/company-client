@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { createOrderAction } from "@/actions/order";
 import { useRouter } from "next/navigation";
+import { ITruck } from "@/definitions/truck";
+import { IProduct } from "@/definitions/product";
 
 export function ReviewStep({
   selectedProduct,
@@ -12,8 +14,8 @@ export function ReviewStep({
   setCollectionDate,
   onBack,
 }: {
-  selectedProduct: any;
-  selectedTrucks: any[];
+  selectedProduct: IProduct | null;
+  selectedTrucks: ITruck[];
   quantities: any;
   collectionDate: string;
   setCollectionDate: (d: string) => void;
@@ -23,33 +25,66 @@ export function ReviewStep({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  if (!selectedProduct) {
+    return (
+      <div className="space-y-4">
+        <p className="text-gray-700 text-sm">
+          Please select a product before reviewing your order.
+        </p>
+        <button
+          onClick={onBack}
+          className="px-6 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100 transition"
+        >
+          Back
+        </button>
+      </div>
+    );
+  }
+
+  const sellingPrice = selectedProduct.sellingPrice ?? 0;
+  const purchasePrice = selectedProduct.costPrice ?? 0;
+
+  const getQuantity = (truckId?: string) =>
+    truckId ? Number(quantities?.[truckId] || 0) : 0;
+
   const total = selectedTrucks.reduce((acc, truck) => {
-    const qty = quantities[truck.id] || 0;
-    return acc + qty * selectedProduct.sellingPrice;
+    const qty = getQuantity(truck.id);
+    return acc + qty * sellingPrice;
   }, 0);
 
-  const totalLitres = Object.values(quantities).reduce(
-    (a: number, b) => a + Number(b || 0),
+  const totalLitres = selectedTrucks.reduce(
+    (acc, truck) => acc + getQuantity(truck.id),
     0
   );
+
+  const orderItems = selectedTrucks
+    .filter((truck): truck is ITruck & { id: string } => Boolean(truck.id))
+    .map((truck) => ({
+      truckId: truck.id,
+      quantity: getQuantity(truck.id),
+    }));
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
       setMessage(null);
 
+      if (!selectedProduct.id) {
+        setMessage("❌ Missing product information. Please go back and retry.");
+        return;
+      }
+
       const orderData = {
         productId: selectedProduct.id,
         totalAmount: total,
         collectionDate,
-        items: selectedTrucks.map((truck) => ({
-          truckId: truck.id,
-          quantity: quantities[truck.id],
-        })),
+        items: orderItems,
       };
 
       const formData = new FormData();
       formData.append("orderData", JSON.stringify(orderData));
+      formData.append("sellingPrice", JSON.stringify(sellingPrice));
+      formData.append("purchasePrice", JSON.stringify(purchasePrice));
 
       const result = await createOrderAction(formData);
 
@@ -85,15 +120,18 @@ export function ReviewStep({
         <div>
           <h3 className="font-medium text-gray-900">Trucks & Quantities</h3>
           <ul className="space-y-2">
-            {selectedTrucks.map((truck) => (
-              <li
-                key={truck.id}
-                className="flex justify-between text-sm text-gray-700 border-b border-gray-200 pb-1"
-              >
-                <span>{truck.plateNumber}</span>
-                <span>{quantities[truck.id]} units</span>
-              </li>
-            ))}
+            {selectedTrucks.map((truck, idx) => {
+              const quantity = getQuantity(truck.id);
+              return (
+                <li
+                  key={truck.id ?? `truck-${idx}`}
+                  className="flex justify-between text-sm text-gray-700 border-b border-gray-200 pb-1"
+                >
+                  <span>{truck.plateNumber}</span>
+                  <span>{quantity} units</span>
+                </li>
+              );
+            })}
           </ul>
           <p className="text-sm text-gray-600 mt-2 border-t border-gray-100 pt-2">
             Total Volume: <strong>{totalLitres} L</strong>

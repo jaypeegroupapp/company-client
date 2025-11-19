@@ -1,8 +1,9 @@
 import { IOrder } from "@/definitions/order";
-import mongoose, { Schema, Document, Model, Types } from "mongoose";
+import mongoose, { Schema, Model, Types } from "mongoose";
 import User from "./user";
 import Company from "./company";
 import Product from "./product";
+import CompanyInvoice from "./company-invoice";
 
 type IOrderDoc = Omit<
   IOrder,
@@ -10,7 +11,7 @@ type IOrderDoc = Omit<
   | "userId"
   | "companyId"
   | "productId"
-  | "productName"
+  | "invoiceId"
   | "collectionDate"
   | "createdAt"
   | "updatedAt"
@@ -18,6 +19,7 @@ type IOrderDoc = Omit<
   userId: Types.ObjectId;
   companyId: Types.ObjectId;
   productId: Types.ObjectId;
+  invoiceId: Types.ObjectId;
   collectionDate: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -40,6 +42,13 @@ const OrderSchema = new Schema<IOrderDoc>(
       ref: Product.modelName,
       required: true,
     },
+    purchasePrice: { type: Number, required: true, default: 0 },
+    sellingPrice: { type: Number, required: true, default: 0 },
+    invoiceId: {
+      type: Schema.Types.ObjectId,
+      ref: CompanyInvoice.modelName,
+      required: false,
+    },
     totalAmount: {
       type: Number,
       required: true,
@@ -51,8 +60,12 @@ const OrderSchema = new Schema<IOrderDoc>(
     },
     status: {
       type: String,
-      enum: ["pending", "in_progress", "completed", "cancelled"],
+      enum: ["pending", "accepted", "completed", "restock", "cancelled"],
       default: "pending",
+    },
+    reason: {
+      type: String,
+      required: false,
     },
   },
   { timestamps: true }

@@ -77,6 +77,8 @@ export async function createOrderService(data: CreateOrderInput) {
           totalAmount: data.totalAmount,
           collectionDate: new Date(data.collectionDate),
           status: data.status || "pending",
+          sellingPrice: data.sellingPrice,
+          purchasePrice: data.purchasePrice,
         },
       ],
       { session }

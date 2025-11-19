@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { getTrucks } from "@/data/truck";
-
 import { TruckSearchInput } from "./search";
 import { TruckSelectAll } from "./select-all";
 import { TruckList } from "./list";
 import { TruckPagination } from "./pagination";
+import { ITruck } from "@/definitions/truck";
 
 export function TruckStep({
   selectedTrucks,
@@ -14,7 +14,7 @@ export function TruckStep({
   onNext,
   onBack,
 }: {
-  selectedTrucks: any[];
+  selectedTrucks: ITruck[];
   setSelectedTrucks: (t: any[]) => void;
   onNext: () => void;
   onBack: () => void;

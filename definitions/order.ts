@@ -3,10 +3,14 @@ export interface IOrder {
   userId: string;
   companyId: string;
   productId: string;
+  purchasePrice?: number;
+  sellingPrice?: number;
+  invoiceId?: string;
   productName: string;
   totalAmount: number;
   collectionDate: string;
   status: string;
+  reason?: string;
   createdAt?: string;
   updatedAt?: string;
   items?: {
@@ -27,4 +31,6 @@ export interface CreateOrderInput {
     truckId: string;
     quantity: number;
   }[];
+  sellingPrice?: number;
+  purchasePrice?: number;
 }

@@ -3,13 +3,14 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getProducts } from "@/data/product"; // Your data service
+import { IProduct } from "@/definitions/product";
 
 export function ProductStep({
   selectedProduct,
   setSelectedProduct,
   onNext,
 }: {
-  selectedProduct: any;
+  selectedProduct: IProduct | null;
   setSelectedProduct: (p: any) => void;
   onNext: () => void;
 }) {
