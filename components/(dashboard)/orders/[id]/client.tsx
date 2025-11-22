@@ -32,7 +32,11 @@ export function OrderDetailsClient({ order }: { order: IOrder }) {
         isWithin48Hours={isWithin48Hours}
       />
 
-      <OrderSummary order={order} isWithin48Hours={isWithin48Hours} totalStockToDeduct={totalStockToDeduct} />
+      <OrderSummary
+        order={order}
+        isWithin48Hours={isWithin48Hours}
+        totalStockToDeduct={totalStockToDeduct}
+      />
 
       {/* 🧩 Order Items Section */}
       <OrderItemsList items={order.items || []} />
