@@ -9,10 +9,12 @@ export function ProductStep({
   selectedProduct,
   setSelectedProduct,
   onNext,
+  onBack,
 }: {
   selectedProduct: IProduct | null;
   setSelectedProduct: (p: any) => void;
   onNext: () => void;
+  onBack: () => void;
 }) {
   const [products, setProducts] = useState<any[]>([]);
 
@@ -48,7 +50,13 @@ export function ProductStep({
         ))}
       </div>
 
-      <div className="pt-6">
+      <div className="pt-6 flex justify-between">
+        <button
+          onClick={onBack}
+          className="px-6 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100"
+        >
+          Back
+        </button>
         <button
           disabled={!selectedProduct}
           onClick={onNext}

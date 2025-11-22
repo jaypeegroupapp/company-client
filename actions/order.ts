@@ -8,9 +8,6 @@ import { updateCollectionDateService } from "@/services/order";
 export async function createOrderAction(formData: FormData) {
   try {
     const jsonData = JSON.parse(formData.get("orderData") as string);
-    const sellingPrice = JSON.parse(formData.get("sellingPrice") as string);
-    const purchasePrice = JSON.parse(formData.get("purchasePrice") as string);
-
     const validated = orderFormSchema.safeParse(jsonData);
 
     if (!validated.success) {
@@ -20,7 +17,15 @@ export async function createOrderAction(formData: FormData) {
       };
     }
 
-    const { productId, totalAmount, collectionDate, items } = validated.data;
+    const {
+      productId,
+      totalAmount,
+      collectionDate,
+      items,
+      sellingPrice,
+      purchasePrice,
+      mineId,
+    } = validated.data;
 
     const session = await verifySession();
     if (!session) return { message: "Unauthorized", errors: {} };
@@ -28,8 +33,21 @@ export async function createOrderAction(formData: FormData) {
     const userId = session.userId as string;
     const companyId = session.companyId as string;
 
+    console.log({
+      userId,
+      mineId,
+      companyId,
+      productId,
+      totalAmount,
+      collectionDate,
+      items,
+      sellingPrice,
+      purchasePrice,
+    });
+
     const result = await createOrderService({
       userId,
+      mineId,
       companyId,
       productId,
       totalAmount,

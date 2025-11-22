@@ -5,8 +5,10 @@ import { createOrderAction } from "@/actions/order";
 import { useRouter } from "next/navigation";
 import { ITruck } from "@/definitions/truck";
 import { IProduct } from "@/definitions/product";
+import { IMine } from "@/definitions/mine";
 
 export function ReviewStep({
+  selectedMine,
   selectedProduct,
   selectedTrucks,
   quantities,
@@ -14,6 +16,7 @@ export function ReviewStep({
   setCollectionDate,
   onBack,
 }: {
+  selectedMine: IMine | null;
   selectedProduct: IProduct | null;
   selectedTrucks: ITruck[];
   quantities: any;
@@ -25,11 +28,11 @@ export function ReviewStep({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  if (!selectedProduct) {
+  if (!selectedMine || !selectedProduct) {
     return (
       <div className="space-y-4">
         <p className="text-gray-700 text-sm">
-          Please select a product before reviewing your order.
+          Please complete previous steps before reviewing your order.
         </p>
         <button
           onClick={onBack}
@@ -64,27 +67,29 @@ export function ReviewStep({
       quantity: getQuantity(truck.id),
     }));
 
+  // 🔥 SERVER ACTION SUBMISSION
   const handleSubmit = async () => {
     try {
       setLoading(true);
       setMessage(null);
 
-      if (!selectedProduct.id) {
-        setMessage("❌ Missing product information. Please go back and retry.");
+      if (!selectedProduct.id || !selectedMine.id) {
+        setMessage("❌ Missing mine or product.");
         return;
       }
 
       const orderData = {
+        mineId: selectedMine.id,
         productId: selectedProduct.id,
         totalAmount: total,
         collectionDate,
+        purchasePrice,
+        sellingPrice,
         items: orderItems,
       };
 
       const formData = new FormData();
       formData.append("orderData", JSON.stringify(orderData));
-      formData.append("sellingPrice", JSON.stringify(sellingPrice));
-      formData.append("purchasePrice", JSON.stringify(purchasePrice));
 
       const result = await createOrderAction(formData);
 
@@ -93,7 +98,7 @@ export function ReviewStep({
         setTimeout(() => {
           setMessage(null);
           router.push("/orders");
-        }, 2000);
+        }, 1500);
       } else {
         setMessage(result?.message || "❌ Failed to create order");
       }
@@ -110,13 +115,19 @@ export function ReviewStep({
       <h2 className="text-xl font-semibold text-gray-900">Review & Confirm</h2>
 
       <div className="border border-gray-200 rounded-xl p-6 space-y-4 bg-gray-50 shadow-sm">
-        {/* Product Info */}
+        {/* Mine */}
+        <div>
+          <h3 className="font-medium text-gray-900">Mine</h3>
+          <p className="text-gray-700">{selectedMine.name}</p>
+        </div>
+
+        {/* Product */}
         <div>
           <h3 className="font-medium text-gray-900">Product</h3>
           <p className="text-gray-700">{selectedProduct.name}</p>
         </div>
 
-        {/* Truck & Quantity Info */}
+        {/* Trucks & quantities */}
         <div>
           <h3 className="font-medium text-gray-900">Trucks & Quantities</h3>
           <ul className="space-y-2">
@@ -128,7 +139,7 @@ export function ReviewStep({
                   className="flex justify-between text-sm text-gray-700 border-b border-gray-200 pb-1"
                 >
                   <span>{truck.plateNumber}</span>
-                  <span>{quantity} units</span>
+                  <span>{quantity} L</span>
                 </li>
               );
             })}
@@ -138,7 +149,7 @@ export function ReviewStep({
           </p>
         </div>
 
-        {/* Collection Date */}
+        {/* Collection date */}
         <div>
           <h3 className="font-medium text-gray-900">Collection Date</h3>
           <input
@@ -149,7 +160,7 @@ export function ReviewStep({
           />
         </div>
 
-        {/* Total Summary */}
+        {/* Total */}
         <div className="pt-4 flex justify-between border-t border-gray-200">
           <p className="text-sm text-gray-700">Total:</p>
           <p className="text-lg font-semibold text-gray-900">
@@ -158,7 +169,7 @@ export function ReviewStep({
         </div>
       </div>
 
-      {/* Status Message */}
+      {/* Status message */}
       {message && (
         <div
           className={`text-center text-sm ${
@@ -169,7 +180,7 @@ export function ReviewStep({
         </div>
       )}
 
-      {/* Actions */}
+      {/* Action buttons */}
       <div className="pt-4 flex justify-between">
         <button
           onClick={onBack}
@@ -178,6 +189,7 @@ export function ReviewStep({
         >
           Back
         </button>
+
         <button
           disabled={!collectionDate || loading}
           onClick={handleSubmit}

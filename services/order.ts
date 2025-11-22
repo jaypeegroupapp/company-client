@@ -10,15 +10,10 @@ import { CreateOrderInput } from "@/definitions/order";
 /**
  * ✅ Get all Orders for the logged-in user
  */
-export async function getOrdersService() {
+export async function getOrdersService(userId: string) {
   await connectDB();
 
   try {
-    const session = await verifySession();
-    if (!session) return [];
-
-    const userId = session.userId as string;
-
     const orders = await Order.find({ userId })
       .populate("userId", "fullName email")
       .populate("companyId", "companyName")
@@ -40,6 +35,7 @@ export async function getOrderByIdService(id: string) {
   await connectDB();
   const order = (await Order.findById(id)
     .populate("productId")
+    .populate("mineId")
     .populate("companyId")
     .populate("userId")
     .lean()) as any;
@@ -72,6 +68,7 @@ export async function createOrderService(data: CreateOrderInput) {
       [
         {
           userId: new Types.ObjectId(data.userId),
+          mineId: new Types.ObjectId(data.mineId),
           companyId: new Types.ObjectId(data.companyId),
           productId: new Types.ObjectId(data.productId),
           totalAmount: data.totalAmount,

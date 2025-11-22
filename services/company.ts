@@ -10,7 +10,7 @@ export async function createCompanyService(data: Partial<ICompany>) {
     ...data,
     userId: new Types.ObjectId(data.userId),
   })) as any;
-  
+
   return company._id.toString();
 }
 
@@ -37,6 +37,12 @@ export async function deleteCompanyService(companyId: string) {
 export async function getCompanyById(companyId: string) {
   await connectDB();
   return await Company.findById(companyId);
+}
+
+// ✅ Get single company
+export async function getCompanyByUserId(userData: any) {
+  await connectDB();
+  return await Company.findOne({ userId: new Types.ObjectId(userData.userId) });
 }
 
 // ✅ Get all companies

@@ -83,10 +83,10 @@ export function OrderSummary({
             </p>
           </div>
 
-          {/* <div>
-            <p className="text-gray-500">Company</p>
-            <p className="font-medium">{order.companyId}</p>
-          </div> */}
+          <div>
+            <p className="text-gray-500">Mine</p>
+            <p className="font-medium">{order.mineName}</p>
+          </div>
 
           <div>
             <p className="text-gray-500">Total Amount</p>

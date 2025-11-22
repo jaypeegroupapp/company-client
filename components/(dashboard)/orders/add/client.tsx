@@ -2,16 +2,22 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
 import { StepIndicator } from "./steps";
+import { MineStep } from "./mine-step";
 import { ProductStep } from "./product-step";
 import { TruckStep } from "./truck-step";
 import { QuantityStep } from "./quantity-step";
 import { ReviewStep } from "./review-step";
+
 import { IProduct } from "@/definitions/product";
 import { ITruck } from "@/definitions/truck";
+import { IMine } from "@/definitions/mine";
 
 export default function AddOrderClient() {
   const [step, setStep] = useState(1);
+
+  const [selectedMine, setSelectedMine] = useState<IMine | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [selectedTrucks, setSelectedTrucks] = useState<ITruck[]>([]);
   const [quantities, setQuantities] = useState<{ [truckId: string]: number }>(
@@ -19,14 +25,15 @@ export default function AddOrderClient() {
   );
   const [collectionDate, setCollectionDate] = useState("");
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, 4));
+  const nextStep = () => setStep((s) => Math.min(s + 1, 5));
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
   const progressLabel = [
+    "Select Mine",
     "Select Product",
     "Select Trucks",
     "Set Quantities",
-    "Review",
+    "Review Order",
   ][step - 1];
 
   return (
@@ -39,6 +46,7 @@ export default function AddOrderClient() {
           </h1>
           <p className="text-sm text-gray-500 mt-1">{progressLabel}</p>
         </div>
+
         <div className="flex gap-2">
           {step > 1 && (
             <button
@@ -54,7 +62,7 @@ export default function AddOrderClient() {
       {/* Step Indicator */}
       <StepIndicator step={step} />
 
-      {/* Card container */}
+      {/* Step Container */}
       <motion.div
         layout
         className="bg-white md:border md:border-gray-200 md:rounded-2xl md:shadow-sm md:p-6 sm:p-8 transition"
@@ -62,7 +70,23 @@ export default function AddOrderClient() {
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
-              key="step1"
+              key="step1-mine"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <MineStep
+                selectedMine={selectedMine}
+                setSelectedMine={setSelectedMine}
+                onNext={nextStep}
+              />
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2-product"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -72,13 +96,14 @@ export default function AddOrderClient() {
                 selectedProduct={selectedProduct}
                 setSelectedProduct={setSelectedProduct}
                 onNext={nextStep}
+                onBack={prevStep}
               />
             </motion.div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <motion.div
-              key="step2"
+              key="step3-trucks"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -93,9 +118,9 @@ export default function AddOrderClient() {
             </motion.div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <motion.div
-              key="step3"
+              key="step4-quantities"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -111,15 +136,16 @@ export default function AddOrderClient() {
             </motion.div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <motion.div
-              key="step4"
+              key="step5-review"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
               <ReviewStep
+                selectedMine={selectedMine}
                 selectedProduct={selectedProduct}
                 selectedTrucks={selectedTrucks}
                 quantities={quantities}

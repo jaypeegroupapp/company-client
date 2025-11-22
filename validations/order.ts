@@ -1,8 +1,12 @@
+import { s } from "framer-motion/client";
 import z from "zod";
 
 export const orderFormSchema = z.object({
   productId: z.string().min(1, "Product is required"),
+  mineId: z.string().min(1, "Mine is required"),
   totalAmount: z.coerce.number().min(0, "Invalid amount"),
+  sellingPrice: z.coerce.number().min(0, "Invalid selling price"),
+  purchasePrice: z.coerce.number().min(0, "Invalid purchase price"),
   collectionDate: z.string().min(1, "Collection date is required"),
   items: z
     .array(

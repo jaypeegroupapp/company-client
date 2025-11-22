@@ -1,11 +1,21 @@
+"use server";
+import { verifySession } from "@/lib/dal";
 import { getOrdersService, getOrderByIdService } from "@/services/order";
+import { m } from "framer-motion";
+import { redirect } from "next/navigation";
 
 /**
  * 🧾 Fetch all orders and map to UI-friendly format
  */
 export async function getOrders() {
   try {
-    const orders = await getOrdersService();
+    const session = await verifySession();
+    if (!session) return [];
+
+    const userId = session.userId as string;
+    if (!userId) redirect("/login");
+
+    const orders = await getOrdersService(userId);
 
     return orders.map((order: any) => ({
       id: order._id.toString(),
@@ -50,6 +60,8 @@ export async function getOrderById(id: string) {
       id: order._id.toString(),
       userId: order.userId?._id?.toString() || "",
       userName: order.userId?.fullName || "",
+      mineId: order.mineId?._id?.toString() || "",
+      mineName: order.mineId?.name || "",
       companyId: order.companyId?._id?.toString() || "",
       companyName: order.companyId?.name || "",
       productId: order.productId?._id?.toString() || "",
