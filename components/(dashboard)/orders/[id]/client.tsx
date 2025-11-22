@@ -14,6 +14,9 @@ export function OrderDetailsClient({ order }: { order: IOrder }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const isWithin48Hours =
     new Date(order.collectionDate).getTime() - Date.now() < 48 * 60 * 60 * 1000;
+  const totalStockToDeduct = order.items
+    ? order.items.reduce((acc, item) => acc + item.quantity, 0)
+    : 0;
 
   return (
     <motion.div
@@ -29,7 +32,7 @@ export function OrderDetailsClient({ order }: { order: IOrder }) {
         isWithin48Hours={isWithin48Hours}
       />
 
-      <OrderSummary order={order} isWithin48Hours={isWithin48Hours} />
+      <OrderSummary order={order} isWithin48Hours={isWithin48Hours} totalStockToDeduct={totalStockToDeduct} />
 
       {/* 🧩 Order Items Section */}
       <OrderItemsList items={order.items || []} />

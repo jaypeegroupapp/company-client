@@ -9,9 +9,11 @@ import { EditCollectionDateModal } from "./edit-collection-date-modal";
 export function OrderSummary({
   order,
   isWithin48Hours,
+  totalStockToDeduct,
 }: {
   order: IOrder;
   isWithin48Hours: boolean;
+  totalStockToDeduct: number;
 }) {
   const [showModal, setShowModal] = useState(false);
 
@@ -81,6 +83,10 @@ export function OrderSummary({
             <p className="font-medium">
               {new Date(order.collectionDate).toLocaleDateString("en-ZA")}
             </p>
+          </div>
+          <div>
+            <p className="text-gray-500">Quantity</p>
+            <p className="font-medium">{totalStockToDeduct}</p>
           </div>
 
           <div>
