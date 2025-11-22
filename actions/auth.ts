@@ -54,6 +54,49 @@ export async function regsiterUser(
   redirect("/register/company");
 }
 
+export async function loginUser(
+  prevState: LoginUserState | undefined,
+  formData: FormData
+) {
+  const validatedFields = loginUserformSchema.safeParse(
+    Object.fromEntries(formData)
+  );
+
+  if (!validatedFields.success) {
+    const state: LoginUserState = {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Oops, I think there's a mistake with your inputs.",
+    };
+    return state;
+  }
+
+  const { email, password } = validatedFields.data;
+
+  try {
+    const user = await getUser({ email });
+    if (!user) {
+      const state: LoginUserState = {
+        errors: { email: ["User does not exists"] },
+      };
+      return state;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      const state: LoginUserState = {
+        errors: { password: ["Incorrect password"] },
+      };
+      return state;
+    }
+
+    await createSession(user.id);
+  } catch (error) {
+    console.error("Error: fetching Something went Wrong:", error);
+  }
+
+  redirect("/");
+}
+
 export async function logout() {
   await deleteSession();
   redirect("/login");
