@@ -75,7 +75,6 @@ export function OrderSummary({
             <p className="text-gray-500">Product</p>
             <p className="font-medium">{order.productName}</p>
           </div>
-
           <div>
             <p className="text-gray-500 flex items-center justify-between">
               Collection Date
@@ -88,17 +87,15 @@ export function OrderSummary({
             <p className="text-gray-500">Quantity</p>
             <p className="font-medium">{totalStockToDeduct}</p>
           </div>
-
-          <div>
-            <p className="text-gray-500">Mine</p>
-            <p className="font-medium">{order.mineName}</p>
-          </div>
-
           <div>
             <p className="text-gray-500">Total Amount</p>
             <p className="font-semibold text-gray-900">
               R{order.totalAmount.toFixed(2)}
             </p>
+          </div>{" "}
+          <div>
+            <p className="text-gray-500">Mine</p>
+            <p className="font-medium">{order.mineName}</p>
           </div>
         </div>
       </div>
