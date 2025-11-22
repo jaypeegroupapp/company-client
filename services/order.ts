@@ -158,3 +158,31 @@ export async function updateCollectionDateService(
 
   return { success: true, message: "Collection date updated successfully" };
 }
+
+export async function getInvoiceOrdersService(invoiceId: string) {
+  await connectDB();
+
+  // Fetch orders linked to this invoice
+  const orders = (await Order.find({ invoiceId })
+    .populate("productId")
+    .lean()) as any[];
+
+  if (!orders.length) return [];
+
+  // Fetch order items for each order
+  const finalOrders = await Promise.all(
+    orders.map(async (order: any) => {
+      const items = (await OrderItem.find({ orderId: order._id })
+        .populate("truckId", "plateNumber registrationNumber")
+        .lean()) as any[];
+
+      return {
+        ...order,
+        id: order._id.toString(),
+        items,
+      };
+    })
+  );
+
+  return finalOrders;
+}

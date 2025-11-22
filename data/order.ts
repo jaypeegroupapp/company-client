@@ -1,6 +1,10 @@
 "use server";
 import { verifySession } from "@/lib/dal";
-import { getOrdersService, getOrderByIdService } from "@/services/order";
+import {
+  getOrdersService,
+  getOrderByIdService,
+  getInvoiceOrdersService,
+} from "@/services/order";
 import { m } from "framer-motion";
 import { redirect } from "next/navigation";
 
@@ -78,5 +82,30 @@ export async function getOrderById(id: string) {
   } catch (err) {
     console.error("❌ getOrderById error:", err);
     return null;
+  }
+}
+
+export async function getInvoiceOrders(invoiceId: string) {
+  try {
+    const orders = await getInvoiceOrdersService(invoiceId);
+    if (!orders.length) return [];
+
+    return orders.map((order: any) => {
+      const mappedItems = order.items.map((item: any) => ({
+        id: item._id.toString(),
+        truckName: item.truckId?.plateNumber || "Unknown Truck",
+        quantity: Number(item.quantity || 0),
+      }));
+
+      return {
+        id: order._id.toString(),
+        productName: order.productId?.name || "Unknown Product",
+        totalAmount: Number(order.totalAmount || 0),
+        items: mappedItems,
+      };
+    });
+  } catch (err) {
+    console.error("❌ getInvoiceOrders error:", err);
+    return [];
   }
 }

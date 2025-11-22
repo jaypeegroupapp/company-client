@@ -7,6 +7,7 @@ import {
   MenuIcon,
   Truck,
   PackageCheck,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,6 +18,7 @@ const navItems = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Trucks", href: "/trucks", icon: Truck },
   { name: "Orders", href: "/orders", icon: PackageCheck },
+  { name: "Company Invoices", href: "/company-invoices", icon: FileText },
   // { name: "Menu", href: "/menu", icon: MenuIcon },
 ];
 
