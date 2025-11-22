@@ -2,58 +2,60 @@ import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "@/lib/session";
 import { cookies } from "next/headers";
 
-// 1. Specify protected and public routes
+// 🔐 Protected pages (DO NOT include "/" here)
 const protectedRoutes = ["/trucks", "/orders"];
 
-const publicRoutes = ["/login", "/register", "/"];
+// 🌐 Public pages
+const publicRoutes = ["/login", "/register"];
 
 export default async function middleware(req: NextRequest) {
-  // 2. Check if the current route is protected or public
   const path = req.nextUrl.pathname;
-  const isProtectedRoute =
-    protectedRoutes.includes(path) ||
-    protectedRoutes.some(
-      (str) => path.startsWith(str) || path.startsWith("/" + str)
-    );
-  const isRegistration =
-    path.includes("/register/company") || path.includes("welcome");
+
+  // 🔐 Protect "/" manually (home page requires auth)
+  const isHome = path === "/";
+
+  // Public pages
   const isPublicRoute = publicRoutes.includes(path);
 
-  // 3. Decrypt the session from the cookie
+  // Protected if exact match or starts with route (except "/")
+  const isProtectedRoute =
+    protectedRoutes.includes(path) ||
+    protectedRoutes.some((route) => route !== "/" && path.startsWith(route));
+
+  // Registration wizard routes
+  const isRegistration =
+    path.includes("/register/company") || path.includes("welcome");
+
+  // 🔑 Get cookies & decrypt session
   const cookie = (await cookies()).get("session")?.value;
   const registrationStep = (await cookies()).get("registrationStep")?.value;
   const session = await decrypt(cookie);
 
-  // 4. Redirect to /login if the user is not authenticated
-  if (isProtectedRoute && !session?.userId) {
+  // ------------------------------------------
+  // 🚫 Not authenticated → accessing protected route or home
+  // ------------------------------------------
+  if (!session?.userId && (isProtectedRoute || isHome)) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
 
-  if (!isRegistration && registrationStep && registrationStep === "0") {
+  // ------------------------------------------
+  // 📝 User logged-in but registration incomplete
+  // ------------------------------------------
+  if (!isRegistration && registrationStep === "0") {
     return NextResponse.redirect(new URL("/register/company", req.nextUrl));
   }
 
-  /*   if (isRegistration && registrationStep) {
-    if (registrationStep === "1") {
-      return NextResponse.redirect(new URL("/new-intake", req.nextUrl));
-    } else if (registrationStep === "2") {
-      return NextResponse.redirect(new URL("/home", req.nextUrl));
-    }
-  } */
-
-  // 5. Redirect to /dashboard if the user is authenticated
-  /* if (
-    isPublicRoute &&
-    session?.userId &&
-    !req.nextUrl.pathname.startsWith("/home")
-  ) {
-    return NextResponse.redirect(new URL("/home", req.nextUrl));
-  } */
+  // ------------------------------------------
+  // 🔄 Logged-in user should not see login/register again
+  // ------------------------------------------
+  if (session?.userId && isPublicRoute) {
+    return NextResponse.redirect(new URL("/", req.nextUrl));
+  }
 
   return NextResponse.next();
 }
 
-// Routes Middleware should not run on
+// Exclude API, Next.js internals, static files
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
 };

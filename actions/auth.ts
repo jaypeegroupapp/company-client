@@ -10,6 +10,7 @@ import { redirect } from "next/navigation";
 import { createSession, deleteSession, setCookie } from "@/lib/session";
 import { createUser, updateExistingUser } from "@/services/auth";
 import { getUser, isUserExists } from "@/data/user";
+import { getCompany } from "@/data/company";
 
 export async function regsiterUser(
   prevState: RegisterUserState | undefined,
@@ -88,8 +89,12 @@ export async function loginUser(
       };
       return state;
     }
+    const company = (await getCompany({ userId: user.id })) as any;
 
-    await createSession(user.id);
+    await createSession({
+      userId: user.id,
+      companyId: company?._id.toString(),
+    });
   } catch (error) {
     console.error("Error: fetching Something went Wrong:", error);
   }
