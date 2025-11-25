@@ -1,28 +1,70 @@
-import { Home } from "lucide-react";
+// app/(company)/dashboard/page.tsx
 
-export default function DashboardPage() {
-  const stats = [
-    { label: "Today's Bookings", value: 12 },
-    { label: "Active Clients", value: 84 },
-    { label: "Staff on Duty", value: 6 },
-    { label: "Pending Services", value: 3 },
-  ];
+import TilesSummary from "@/components/(dashboard)/dashboard/tiles-summary";
+import BarChartCard from "@/components/(dashboard)/dashboard/bar-chart-card";
+import LineChartCard from "@/components/(dashboard)/dashboard/line-chart-card";
+import PieChartCard from "@/components/(dashboard)/dashboard/pie-chart-card";
+
+export const dynamic = "force-dynamic";
+
+import {
+  // COMPANY-SPECIFIC ANALYTICS ONLY
+  getCompanyDashboardSummary,
+  getCompanyMonthlyOrdersStats,
+  getCompanyOrderStatusStats,
+  getCompanyOrdersByMine,
+  getCompanyTruckStatus,
+  getCompanyMonthlyInvoices,
+} from "@/data/dashboard";
+
+export default async function CompanyDashboardPage() {
+  const summary = await getCompanyDashboardSummary();
+  const monthlyOrders = await getCompanyMonthlyOrdersStats();
+  const orderStatusStats = await getCompanyOrderStatusStats();
+  const ordersByMine = await getCompanyOrdersByMine();
+
+  const truckStatus = await getCompanyTruckStatus();
+  const monthlyCompanyInvoices = await getCompanyMonthlyInvoices();
 
   return (
-    <div className="space-y-6">
-      <div className="flex gap-2 items-center">
-        <Home /> <h1 className="text-xl font-semibold">Dashboard Overview</h1>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="bg-white border border-border rounded-xl p-4 shadow-sm text-center"
-          >
-            <p className="text-gray-500 text-sm">{s.label}</p>
-            <p className="text-lg font-bold text-gray-800">{s.value}</p>
-          </div>
-        ))}
+    <div className="py-4 md:p-4 space-y-6">
+      {/* SUMMARY TILE SECTION */}
+      <TilesSummary data={summary} />
+
+      {/* MAIN DASHBOARD GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <LineChartCard
+          title="Monthly Orders"
+          data={monthlyOrders}
+          dataKey="orders"
+        />
+
+        <PieChartCard
+          title="Order Status Breakdown"
+          data={orderStatusStats}
+          dataKey="value"
+          nameKey="status"
+        />
+
+        <BarChartCard
+          title="Orders by Mine"
+          data={ordersByMine}
+          xKey="mine"
+          barKey="orders"
+        />
+
+        <PieChartCard
+          title="Active vs Inactive Trucks"
+          data={truckStatus}
+          dataKey="count"
+          nameKey="status"
+        />
+
+        <LineChartCard
+          title="Company Invoice Revenue (Monthly)"
+          data={monthlyCompanyInvoices}
+          dataKey="total"
+        />
       </div>
     </div>
   );
