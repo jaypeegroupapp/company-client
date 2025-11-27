@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PlusCircle, Wallet } from "lucide-react";
+import { PackageCheck, PlusCircle, Wallet } from "lucide-react";
 
 export function OrderHeader({
   credit,
@@ -11,7 +11,10 @@ export function OrderHeader({
   return (
     <div className="flex justify-between items-center flex-wrap gap-4">
       <div className="flex items-center gap-8">
-        <h1 className="text-xl font-semibold text-gray-800">Orders</h1>
+        <div className="flex items-center gap-2">
+          <PackageCheck className="w-6 h-6 text-gray-700" />
+          <h1 className="text-xl font-semibold text-gray-800">Orders</h1>
+        </div>
 
         {credit && (
           <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-lg text-sm">
