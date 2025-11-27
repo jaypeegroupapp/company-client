@@ -37,3 +37,10 @@ export interface CreateOrderInput {
   sellingPrice?: number;
   purchasePrice?: number;
 }
+
+export type OrderTab =
+  | "All"
+  | "Pending"
+  | "Accepted"
+  | "Completed"
+  | "Cancelled";
