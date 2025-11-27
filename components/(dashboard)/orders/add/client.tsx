@@ -14,7 +14,11 @@ import { IProduct } from "@/definitions/product";
 import { ITruck } from "@/definitions/truck";
 import { IMine } from "@/definitions/mine";
 
-export default function AddOrderClient() {
+export default function AddOrderClient({
+  credit,
+}: {
+  credit: { limit: number; balance: number };
+}) {
   const [step, setStep] = useState(1);
 
   const [selectedMine, setSelectedMine] = useState<IMine | null>(null);
@@ -78,6 +82,7 @@ export default function AddOrderClient() {
             >
               <MineStep
                 selectedMine={selectedMine}
+                credit={credit}
                 setSelectedMine={setSelectedMine}
                 onNext={nextStep}
               />
@@ -94,6 +99,7 @@ export default function AddOrderClient() {
             >
               <ProductStep
                 selectedProduct={selectedProduct}
+                credit={credit}
                 setSelectedProduct={setSelectedProduct}
                 onNext={nextStep}
                 onBack={prevStep}
@@ -111,6 +117,7 @@ export default function AddOrderClient() {
             >
               <TruckStep
                 selectedTrucks={selectedTrucks}
+                credit={credit}
                 setSelectedTrucks={setSelectedTrucks}
                 onNext={nextStep}
                 onBack={prevStep}
@@ -129,6 +136,7 @@ export default function AddOrderClient() {
               <QuantityStep
                 selectedTrucks={selectedTrucks}
                 quantities={quantities}
+                credit={credit}
                 setQuantities={setQuantities}
                 onNext={nextStep}
                 onBack={prevStep}
@@ -149,6 +157,7 @@ export default function AddOrderClient() {
                 selectedProduct={selectedProduct}
                 selectedTrucks={selectedTrucks}
                 quantities={quantities}
+                credit={credit}
                 collectionDate={collectionDate}
                 setCollectionDate={setCollectionDate}
                 onBack={prevStep}

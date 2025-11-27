@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { ITruck } from "@/definitions/truck";
 import { IProduct } from "@/definitions/product";
 import { IMine } from "@/definitions/mine";
+import CreditBalance from "./credit-balance";
 
 export function ReviewStep({
   selectedMine,
   selectedProduct,
   selectedTrucks,
   quantities,
+  credit,
   collectionDate,
   setCollectionDate,
   onBack,
@@ -20,6 +22,7 @@ export function ReviewStep({
   selectedProduct: IProduct | null;
   selectedTrucks: ITruck[];
   quantities: any;
+  credit: { limit: number; balance: number };
   collectionDate: string;
   setCollectionDate: (d: string) => void;
   onBack: () => void;
@@ -50,6 +53,7 @@ export function ReviewStep({
   const getQuantity = (truckId?: string) =>
     truckId ? Number(quantities?.[truckId] || 0) : 0;
 
+  // 🧮 Compute totals
   const total = selectedTrucks.reduce((acc, truck) => {
     const qty = getQuantity(truck.id);
     return acc + qty * sellingPrice;
@@ -61,20 +65,22 @@ export function ReviewStep({
   );
 
   const orderItems = selectedTrucks
-    .filter((truck): truck is ITruck & { id: string } => Boolean(truck.id))
+    .filter((truck) => Boolean(truck.id))
     .map((truck) => ({
       truckId: truck.id,
       quantity: getQuantity(truck.id),
     }));
 
-  // 🔥 SERVER ACTION SUBMISSION
+  // 🚨 BALANCE VALIDATION
+  const insufficientBalance = total > credit.balance;
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
       setMessage(null);
 
-      if (!selectedProduct.id || !selectedMine.id) {
-        setMessage("❌ Missing mine or product.");
+      if (insufficientBalance) {
+        setMessage("❌ You do not have enough credit to complete this order.");
         return;
       }
 
@@ -102,7 +108,7 @@ export function ReviewStep({
       } else {
         setMessage(result?.message || "❌ Failed to create order");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("createOrderAction error:", error);
       setMessage("❌ Unexpected error occurred.");
     } finally {
@@ -112,7 +118,12 @@ export function ReviewStep({
 
   return (
     <div className="space-y-8">
-      <h2 className="text-xl font-semibold text-gray-900">Review & Confirm</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Review & Confirm
+        </h2>
+        <CreditBalance credit={credit} />
+      </div>
 
       <div className="border border-gray-200 rounded-xl p-6 space-y-4 bg-gray-50 shadow-sm">
         {/* Mine */}
@@ -127,7 +138,7 @@ export function ReviewStep({
           <p className="text-gray-700">{selectedProduct.name}</p>
         </div>
 
-        {/* Trucks & quantities */}
+        {/* Trucks */}
         <div>
           <h3 className="font-medium text-gray-900">Trucks & Quantities</h3>
           <ul className="space-y-2">
@@ -144,12 +155,13 @@ export function ReviewStep({
               );
             })}
           </ul>
+
           <p className="text-sm text-gray-600 mt-2 border-t border-gray-100 pt-2">
             Total Volume: <strong>{totalLitres} L</strong>
           </p>
         </div>
 
-        {/* Collection date */}
+        {/* Collection Date */}
         <div>
           <h3 className="font-medium text-gray-900">Collection Date</h3>
           <input
@@ -160,13 +172,21 @@ export function ReviewStep({
           />
         </div>
 
-        {/* Total */}
+        {/* Total price */}
         <div className="pt-4 flex justify-between border-t border-gray-200">
           <p className="text-sm text-gray-700">Total:</p>
           <p className="text-lg font-semibold text-gray-900">
             R {total.toFixed(2)}
           </p>
         </div>
+
+        {/* ❌ Insufficient balance error */}
+        {insufficientBalance && (
+          <p className="text-red-600 text-sm font-medium mt-2">
+            ❌ You do not have enough credit to place this order. (Available: R
+            {credit.balance.toFixed(2)} | Needed: R{total.toFixed(2)})
+          </p>
+        )}
       </div>
 
       {/* Status message */}
@@ -180,7 +200,7 @@ export function ReviewStep({
         </div>
       )}
 
-      {/* Action buttons */}
+      {/* Buttons */}
       <div className="pt-4 flex justify-between">
         <button
           onClick={onBack}
@@ -191,12 +211,12 @@ export function ReviewStep({
         </button>
 
         <button
-          disabled={!collectionDate || loading}
+          disabled={!collectionDate || loading || insufficientBalance}
           onClick={handleSubmit}
           className={`px-6 py-2 rounded-lg text-white font-medium transition ${
-            collectionDate && !loading
-              ? "bg-gray-900 hover:bg-black"
-              : "bg-gray-400 cursor-not-allowed"
+            !collectionDate || loading || insufficientBalance
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gray-900 hover:bg-black"
           }`}
         >
           {loading ? "Saving..." : "Confirm Order"}

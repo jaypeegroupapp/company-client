@@ -1,15 +1,18 @@
 "use client";
 import { ITruck } from "@/definitions/truck";
+import CreditBalance from "./credit-balance";
 
 export function QuantityStep({
   selectedTrucks,
   quantities,
+  credit,
   setQuantities,
   onNext,
   onBack,
 }: {
   selectedTrucks: ITruck[];
   quantities: { [truckId: string]: number };
+  credit: { limit: number; balance: number };
   setQuantities: (q: any) => void;
   onNext: () => void;
   onBack: () => void;
@@ -44,9 +47,10 @@ export function QuantityStep({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">
-        Select Product Quantity per Truck
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Set Quantities</h2>
+        <CreditBalance credit={credit} />
+      </div>
 
       <div className="space-y-4">
         {selectedTrucks.map((truck, index) => {

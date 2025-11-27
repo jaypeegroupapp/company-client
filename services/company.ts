@@ -34,7 +34,7 @@ export async function deleteCompanyService(companyId: string) {
 }
 
 // ✅ Get single company
-export async function getCompanyById(companyId: string) {
+export async function getCompanyByIdService(companyId: string) {
   await connectDB();
   return await Company.findById(companyId);
 }

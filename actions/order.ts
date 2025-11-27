@@ -4,6 +4,7 @@ import { verifySession } from "@/lib/dal";
 import { orderFormSchema } from "@/validations/order";
 import { revalidatePath } from "next/cache";
 import { updateCollectionDateService } from "@/services/order";
+import { updateCompanyCreditService } from "@/services/company-credit";
 
 export async function createOrderAction(formData: FormData) {
   try {
@@ -33,18 +34,21 @@ export async function createOrderAction(formData: FormData) {
     const userId = session.userId as string;
     const companyId = session.companyId as string;
 
-    console.log({
-      userId,
-      mineId,
-      companyId,
-      productId,
-      totalAmount,
-      collectionDate,
-      items,
-      sellingPrice,
-      purchasePrice,
+    // 1️⃣ Check company balance
+    const companyCredit = await updateCompanyCreditService(companyId, {
+      amount: -totalAmount, // Deduct order total
+      reason: `Order payment for product ${productId}`,
+      type: "order-debit",
     });
 
+    if (companyCredit.newBalance < 0) {
+      return {
+        message: "❌ Order total exceeds company account balance.",
+        errors: {},
+      };
+    }
+
+    // 2️⃣ Create the order
     const result = await createOrderService({
       userId,
       mineId,
@@ -58,6 +62,13 @@ export async function createOrderAction(formData: FormData) {
     });
 
     if (!result.success) {
+      // Rollback balance if order creation failed
+      await updateCompanyCreditService(companyId, {
+        amount: totalAmount, // Refund the amount
+        reason: `Rollback failed order ${result.orderId}`,
+        type: "credit-updated",
+      });
+
       return {
         message: "Failed to create order",
         errors: { global: [result.message || "Unknown error"] },

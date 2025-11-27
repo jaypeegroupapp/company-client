@@ -4,14 +4,17 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getProducts } from "@/data/product"; // Your data service
 import { IProduct } from "@/definitions/product";
+import CreditBalance from "./credit-balance";
 
 export function ProductStep({
   selectedProduct,
+  credit,
   setSelectedProduct,
   onNext,
   onBack,
 }: {
   selectedProduct: IProduct | null;
+  credit: { limit: number; balance: number };
   setSelectedProduct: (p: any) => void;
   onNext: () => void;
   onBack: () => void;
@@ -28,7 +31,11 @@ export function ProductStep({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Select a Product</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Select a Product</h2>
+        <CreditBalance credit={credit} />
+      </div>
+
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         {products.map((product) => (
           <motion.div

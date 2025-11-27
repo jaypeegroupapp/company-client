@@ -4,13 +4,17 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { IMine } from "@/definitions/mine";
 import { getMines } from "@/data/mine";
+import { Wallet } from "lucide-react";
+import CreditBalance from "./credit-balance";
 
 export function MineStep({
   selectedMine,
+  credit,
   setSelectedMine,
   onNext,
 }: {
   selectedMine: IMine | null;
+  credit: { limit: number; balance: number };
   setSelectedMine: (m: IMine) => void;
   onNext: () => void;
 }) {
@@ -26,7 +30,11 @@ export function MineStep({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Select a Mine</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Select a Mine</h2>
+        {/* Credit Info */}
+        <CreditBalance credit={credit} />
+      </div>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
         {mines.map((mine) => (
