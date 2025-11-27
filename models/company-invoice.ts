@@ -16,8 +16,7 @@ const CompanyInvoiceSchema: Schema<ICompanyInvoiceDoc> = new Schema(
 
     status: {
       type: String,
-      enum: ["pending", "published", "paid", "closed"],
-      default: "pending",
+      enum: ["published", "paid", "closed"],
     },
 
     totalAmount: {
