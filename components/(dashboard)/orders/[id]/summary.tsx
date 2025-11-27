@@ -63,10 +63,13 @@ export function OrderSummary({
           </div>
         </div>
         {/* ❗ Disclaimer */}
-        <p className="text-xs text-red-700 text-center">
-          * Rescheduling or cancelling a collection is only allowed up to 48
-          hours before the collection date.
-        </p>
+        {(order.status === "pending" || order.status === "accepted") &&
+          !isWithin48Hours && (
+            <p className="text-xs text-red-700 text-center">
+              * Rescheduling or cancelling a collection is only allowed up to 48
+              hours before the collection date.
+            </p>
+          )}
 
         <div className="border-t border-gray-200 my-4" />
 
