@@ -29,6 +29,10 @@ export async function getCompanyDashboardSummary() {
       totalOrders: 0,
       totalTrucks: 0,
       totalCompanyInvoices: 0,
+      credit: {
+        limit: 0,
+        balance: 0,
+      },
     };
   }
 }

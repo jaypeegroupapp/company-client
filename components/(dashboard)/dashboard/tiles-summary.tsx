@@ -1,4 +1,4 @@
-import { FileText, PackageCheck, Truck } from "lucide-react";
+import { FileText, PackageCheck, Truck, Wallet } from "lucide-react";
 
 export default function TilesSummary({ data }: { data: any }) {
   const tiles = [
@@ -12,6 +12,16 @@ export default function TilesSummary({ data }: { data: any }) {
       icon: FileText,
       label: "Company Invoices",
       value: data.totalCompanyInvoices,
+    },
+    {
+      icon: Wallet,
+      label: "Account Balance",
+      value: `R${data.credit.balance}`,
+    },
+    {
+      icon: Wallet,
+      label: "Credit Limit",
+      value: `R${data.credit.limit}`,
     },
   ];
 

@@ -8,6 +8,8 @@ import Product from "@/models/product";
 import Mine from "@/models/mine";
 import CompanyInvoice from "@/models/company-invoice";
 import { Types } from "mongoose";
+import { getCompanyDetails } from "@/data/company";
+import { getCompanyByIdService } from "./company";
 
 /* -----------------------------------------------------
    0. DASHBOARD SUMMARY
@@ -15,16 +17,22 @@ import { Types } from "mongoose";
 export async function getCompanyDashboardSummaryService(companyId: string) {
   await connectDB();
 
-  const [totalOrders, totalTrucks, totalCompanyInvoices] = await Promise.all([
-    Order.countDocuments({ companyId }),
-    Truck.countDocuments({ companyId, isActive: true }),
-    CompanyInvoice.countDocuments({ companyId, status: "published" }),
-  ]);
+  const [totalOrders, totalTrucks, totalCompanyInvoices, company] =
+    await Promise.all([
+      Order.countDocuments({ companyId }),
+      Truck.countDocuments({ companyId, isActive: true }),
+      CompanyInvoice.countDocuments({ companyId, status: "published" }),
+      getCompanyByIdService(companyId),
+    ]);
 
   return {
     totalOrders,
     totalTrucks,
     totalCompanyInvoices,
+    credit: {
+      limit: company?.creditLimit || 0,
+      balance: company?.balance || 0,
+    },
   };
 }
 

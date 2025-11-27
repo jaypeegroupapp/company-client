@@ -16,6 +16,7 @@ import {
   getCompanyTruckStatus,
   getCompanyMonthlyInvoices,
 } from "@/data/dashboard";
+import { Home } from "lucide-react";
 
 export default async function CompanyDashboardPage() {
   const summary = await getCompanyDashboardSummary();
@@ -28,6 +29,12 @@ export default async function CompanyDashboardPage() {
 
   return (
     <div className="py-4 md:p-4 space-y-6">
+      {/* Header Section */}
+      <div className="flex items-center gap-2">
+        <Home className="w-6 h-6 text-gray-700" />
+        <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
+      </div>
+
       {/* SUMMARY TILE SECTION */}
       <TilesSummary data={summary} />
 
