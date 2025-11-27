@@ -11,9 +11,10 @@ import { getOrders } from "@/data/order";
 
 interface Props {
   initialOrders: IOrder[];
+  credit: { limit: number; balance: number };
 }
 
-export function OrderClientPage({ initialOrders }: Props) {
+export function OrderClientPage({ initialOrders, credit }: Props) {
   const [orders, setOrders] = useState<IOrder[]>(initialOrders || []);
   const [filterText, setFilterText] = useState("");
   const router = useRouter();
@@ -44,7 +45,7 @@ export function OrderClientPage({ initialOrders }: Props) {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <OrderHeader />
+      <OrderHeader credit={credit} />
       <OrderFilter onFilterChange={(text: string) => setFilterText(text)} />
       <OrderList initialOrders={filtered} />
     </motion.div>
