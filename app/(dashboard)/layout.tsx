@@ -16,9 +16,10 @@ import clsx from "clsx";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: Home },
-  { name: "Trucks", href: "/trucks", icon: Truck },
   { name: "Orders", href: "/orders", icon: PackageCheck },
+  { name: "Truck Orders", href: "/truck-orders", icon: Truck },
   { name: "Company Invoices", href: "/company-invoices", icon: FileText },
+  { name: "Trucks", href: "/trucks", icon: Truck },
   // { name: "Menu", href: "/menu", icon: MenuIcon },
 ];
 
