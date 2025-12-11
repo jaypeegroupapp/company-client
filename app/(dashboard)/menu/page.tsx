@@ -1,47 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Scissors,
-  Users,
-  User,
-  Settings,
-  LogOut,
-  ChevronLeft,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-
-const menuItems = [
-  {
-    name: "Services",
-    icon: Scissors,
-    href: "/services",
-  },
-  {
-    name: "Staff",
-    icon: Users,
-    href: "/staff",
-  },
-  {
-    name: "Profile",
-    icon: User,
-    href: "/profile",
-  },
-  {
-    name: "Settings",
-    icon: Settings,
-    href: "/settings",
-  },
-  {
-    name: "Logout",
-    icon: LogOut,
-    href: "/logout",
-  },
-];
+import { ChevronLeft } from "lucide-react";
+import { otherNavItems } from "@/constants/dashboard";
 
 export default function MenuPage() {
-  const router = useRouter();
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -52,7 +15,7 @@ export default function MenuPage() {
 
       {/* Menu List */}
       <div className="space-y-2 divide-y">
-        {menuItems.map((item, index) => (
+        {otherNavItems.map((item, index) => (
           <Link
             key={index}
             href={item.href}
