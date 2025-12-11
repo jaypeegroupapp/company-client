@@ -5,24 +5,24 @@ import { createOrderAction } from "@/actions/order";
 import { useRouter } from "next/navigation";
 import { ITruck } from "@/definitions/truck";
 import { IProduct } from "@/definitions/product";
-import { IMine } from "@/definitions/mine";
 import CreditBalance from "./credit-balance";
+import { ICompanyCredit } from "@/definitions/company-credit";
 
 export function ReviewStep({
   selectedMine,
   selectedProduct,
   selectedTrucks,
   quantities,
-  credit,
+  debit,
   collectionDate,
   setCollectionDate,
   onBack,
 }: {
-  selectedMine: IMine | null;
+  selectedMine: ICompanyCredit | null;
   selectedProduct: IProduct | null;
   selectedTrucks: ITruck[];
   quantities: any;
-  credit: { limit: number; balance: number };
+  debit: { debitAmount: number; usedDebit: number };
   collectionDate: string;
   setCollectionDate: (d: string) => void;
   onBack: () => void;
@@ -49,6 +49,10 @@ export function ReviewStep({
 
   const sellingPrice = selectedProduct.sellingPrice ?? 0;
   const purchasePrice = selectedProduct.purchasePrice ?? 0;
+  const balance =
+    debit.debitAmount -
+    debit.usedDebit +
+    (selectedMine.creditLimit - selectedMine.usedCredit);
 
   const getQuantity = (truckId?: string) =>
     truckId ? Number(quantities?.[truckId] || 0) : 0;
@@ -72,7 +76,7 @@ export function ReviewStep({
     }));
 
   // 🚨 BALANCE VALIDATION
-  const insufficientBalance = total > credit.balance;
+  const insufficientBalance = total > balance;
 
   const handleSubmit = async () => {
     try {
@@ -85,7 +89,7 @@ export function ReviewStep({
       }
 
       const orderData = {
-        mineId: selectedMine.id,
+        mineId: selectedMine.mineId,
         productId: selectedProduct.id,
         totalAmount: total,
         collectionDate,
@@ -93,6 +97,9 @@ export function ReviewStep({
         sellingPrice,
         items: orderItems,
       };
+
+      console.log("orderData:", orderData);
+      console.log({ selectedMine });
 
       const formData = new FormData();
       formData.append("orderData", JSON.stringify(orderData));
@@ -122,14 +129,14 @@ export function ReviewStep({
         <h2 className="text-xl font-semibold text-gray-900">
           Review & Confirm
         </h2>
-        <CreditBalance credit={credit} />
+        <CreditBalance debit={debit} selectedMine={selectedMine} />
       </div>
 
       <div className="border border-gray-200 rounded-xl p-6 space-y-4 bg-gray-50 shadow-sm">
         {/* Mine */}
         <div>
           <h3 className="font-medium text-gray-900">Mine</h3>
-          <p className="text-gray-700">{selectedMine.name}</p>
+          <p className="text-gray-700">{selectedMine.mineName}</p>
         </div>
 
         {/* Product */}
@@ -184,7 +191,7 @@ export function ReviewStep({
         {insufficientBalance && (
           <p className="text-red-600 text-sm font-medium mt-2">
             ❌ You do not have enough credit to place this order. (Available: R
-            {credit.balance.toFixed(2)} | Needed: R{total.toFixed(2)})
+            {balance.toFixed(2)} | Needed: R{total.toFixed(2)})
           </p>
         )}
       </div>

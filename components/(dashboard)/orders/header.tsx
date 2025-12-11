@@ -4,10 +4,12 @@ import Link from "next/link";
 import { PackageCheck, PlusCircle, Wallet } from "lucide-react";
 
 export function OrderHeader({
-  credit,
+  debit,
 }: {
-  credit: { limit: number; balance: number };
+  debit: { debitAmount: number; usedDebit: number };
 }) {
+  const balance = debit.debitAmount - debit.usedDebit;
+
   return (
     <div className="flex justify-between items-center flex-wrap gap-4">
       <div className="flex items-center gap-8">
@@ -16,12 +18,11 @@ export function OrderHeader({
           <h1 className="text-xl font-semibold text-gray-800">Orders</h1>
         </div>
 
-        {credit && (
+        {debit && (
           <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-lg text-sm">
             <Wallet size={16} className="text-gray-600" />
             <span className="text-gray-700">
-              Balance: <strong>R{credit.balance}</strong> / Limit:{" "}
-              <strong>R{credit.limit}</strong>
+              Debit Balance: <strong>R{balance}</strong>
             </span>
           </div>
         )}

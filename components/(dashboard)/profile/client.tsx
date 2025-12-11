@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { motion } from "framer-motion";
 import { logout } from "@/actions/auth";
+import { ICompany } from "@/definitions/company";
 
 interface Props {
   user: {
@@ -10,9 +11,10 @@ interface Props {
     email?: string;
     role?: string;
   } | null;
+  company?: ICompany | undefined;
 }
 
-export function ProfileClient({ user }: Props) {
+export function ProfileClient({ user, company }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
@@ -36,7 +38,7 @@ export function ProfileClient({ user }: Props) {
       <div className="border-t border-gray-100 pt-6 space-y-4">
         <div>
           <p className="text-sm text-gray-600">Full Name</p>
-          <p className="text-gray-900 font-medium">{user?.fullName || "—"}</p>
+          <p className="text-gray-900 font-medium">{company?.companyName || "—"}</p>
         </div>
 
         <div>

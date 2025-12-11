@@ -12,16 +12,16 @@ import { ReviewStep } from "./review-step";
 
 import { IProduct } from "@/definitions/product";
 import { ITruck } from "@/definitions/truck";
-import { IMine } from "@/definitions/mine";
+import { ICompanyCredit } from "@/definitions/company-credit";
 
 export default function AddOrderClient({
-  credit,
+  debit,
 }: {
-  credit: { limit: number; balance: number };
+  debit: { debitAmount: number; usedDebit: number };
 }) {
   const [step, setStep] = useState(1);
 
-  const [selectedMine, setSelectedMine] = useState<IMine | null>(null);
+  const [selectedMine, setSelectedMine] = useState<ICompanyCredit | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [selectedTrucks, setSelectedTrucks] = useState<ITruck[]>([]);
   const [quantities, setQuantities] = useState<{ [truckId: string]: number }>(
@@ -82,7 +82,7 @@ export default function AddOrderClient({
             >
               <MineStep
                 selectedMine={selectedMine}
-                credit={credit}
+                debit={debit}
                 setSelectedMine={setSelectedMine}
                 onNext={nextStep}
               />
@@ -98,8 +98,9 @@ export default function AddOrderClient({
               transition={{ duration: 0.3 }}
             >
               <ProductStep
+                selectedMine={selectedMine}
                 selectedProduct={selectedProduct}
-                credit={credit}
+                debit={debit}
                 setSelectedProduct={setSelectedProduct}
                 onNext={nextStep}
                 onBack={prevStep}
@@ -116,8 +117,9 @@ export default function AddOrderClient({
               transition={{ duration: 0.3 }}
             >
               <TruckStep
+                selectedMine={selectedMine}
                 selectedTrucks={selectedTrucks}
-                credit={credit}
+                debit={debit}
                 setSelectedTrucks={setSelectedTrucks}
                 onNext={nextStep}
                 onBack={prevStep}
@@ -134,9 +136,10 @@ export default function AddOrderClient({
               transition={{ duration: 0.3 }}
             >
               <QuantityStep
+                selectedMine={selectedMine}
                 selectedTrucks={selectedTrucks}
                 quantities={quantities}
-                credit={credit}
+                debit={debit}
                 setQuantities={setQuantities}
                 onNext={nextStep}
                 onBack={prevStep}
@@ -157,7 +160,7 @@ export default function AddOrderClient({
                 selectedProduct={selectedProduct}
                 selectedTrucks={selectedTrucks}
                 quantities={quantities}
-                credit={credit}
+                debit={debit}
                 collectionDate={collectionDate}
                 setCollectionDate={setCollectionDate}
                 onBack={prevStep}

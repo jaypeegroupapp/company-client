@@ -8,16 +8,19 @@ import { TruckList } from "./list";
 import { TruckPagination } from "./pagination";
 import { ITruck } from "@/definitions/truck";
 import CreditBalance from "./credit-balance";
+import { ICompanyCredit } from "@/definitions/company-credit";
 
 export function TruckStep({
+  selectedMine,
   selectedTrucks,
-  credit,
+  debit,
   setSelectedTrucks,
   onNext,
   onBack,
 }: {
+  selectedMine: ICompanyCredit | null;
   selectedTrucks: ITruck[];
-  credit: { limit: number; balance: number };
+  debit: { debitAmount: number; usedDebit: number };
   setSelectedTrucks: (t: any[]) => void;
   onNext: () => void;
   onBack: () => void;
@@ -89,7 +92,7 @@ export function TruckStep({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Select Trucks</h2>
-        <CreditBalance credit={credit} />
+        <CreditBalance debit={debit} selectedMine={selectedMine} />
       </div>
 
       <TruckSearchInput

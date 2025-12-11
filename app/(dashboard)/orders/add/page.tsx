@@ -8,9 +8,9 @@ export default async function AddOrderPage() {
 
   return (
     <AddOrderClient
-      credit={{
-        limit: company?.creditLimit || 0,
-        balance: company?.balance || 0,
+      debit={{
+        debitAmount: company?.debitAmount || 0,
+        usedDebit: company?.usedDebit || 0,
       }}
     />
   );

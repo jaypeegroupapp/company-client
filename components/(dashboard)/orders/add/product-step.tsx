@@ -5,16 +5,19 @@ import { useEffect, useState } from "react";
 import { getProducts } from "@/data/product"; // Your data service
 import { IProduct } from "@/definitions/product";
 import CreditBalance from "./credit-balance";
+import { ICompanyCredit } from "@/definitions/company-credit";
 
 export function ProductStep({
+  selectedMine,
   selectedProduct,
-  credit,
+  debit,
   setSelectedProduct,
   onNext,
   onBack,
 }: {
+  selectedMine: ICompanyCredit | null;
   selectedProduct: IProduct | null;
-  credit: { limit: number; balance: number };
+  debit: { debitAmount: number; usedDebit: number };
   setSelectedProduct: (p: any) => void;
   onNext: () => void;
   onBack: () => void;
@@ -33,7 +36,7 @@ export function ProductStep({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Select a Product</h2>
-        <CreditBalance credit={credit} />
+        <CreditBalance debit={debit} selectedMine={selectedMine} />
       </div>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">

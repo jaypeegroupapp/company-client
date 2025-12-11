@@ -12,10 +12,10 @@ import { OrderTabs } from "./tabs";
 
 interface Props {
   initialOrders: IOrder[];
-  credit: { limit: number; balance: number };
+  debit: { debitAmount: number; usedDebit: number };
 }
 
-export function OrderClientPage({ initialOrders, credit }: Props) {
+export function OrderClientPage({ initialOrders, debit }: Props) {
   const [orders, setOrders] = useState<IOrder[]>(initialOrders || []);
   const [filterText, setFilterText] = useState("");
   const [activeTab, setActiveTab] = useState<OrderTab>("All");
@@ -75,7 +75,7 @@ export function OrderClientPage({ initialOrders, credit }: Props) {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <OrderHeader credit={credit} />
+      <OrderHeader debit={debit} />
       <div className="flex flex-col lg:flex-row items-center gap-4">
         {/* TAB FILTERS */}
         <OrderTabs
