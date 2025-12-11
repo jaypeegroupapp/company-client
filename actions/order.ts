@@ -36,7 +36,7 @@ export async function createOrderAction(formData: FormData) {
 
     // 1️⃣ Check company balance
     const companyCredit = await updateCompanyCreditService(companyId, {
-      amount: -totalAmount, // Deduct order total
+      amount: totalAmount, // Deduct order total
       reason: `Order payment for product ${productId}`,
       type: "order-debit",
     });
