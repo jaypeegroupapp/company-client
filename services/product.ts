@@ -5,7 +5,9 @@ import { connectDB } from "@/lib/db";
 
 export async function getAllProductsService() {
   await connectDB();
-  return await Product.find().sort({ createdAt: -1 }).lean();
+  return await Product.find({ isPublished: true })
+    .sort({ createdAt: -1 })
+    .lean();
 }
 
 export async function getProductByIdService(id: string) {
