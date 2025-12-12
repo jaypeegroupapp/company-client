@@ -2,16 +2,42 @@ import { connectDB } from "@/lib/db";
 import Company from "@/models/company";
 import CompanyCredit from "@/models/company-credit";
 import CompanyCreditTrail from "@/models/company-credit-trail";
+import Mine from "@/models/mine";
 import mongoose, { Types } from "mongoose";
 
 export async function getCompanyCreditsByCompanyIdService(companyId: string) {
   await connectDB();
 
-  return await CompanyCredit.find({
-    companyId: new Types.ObjectId(companyId),
-  })
-    .populate("mineId") // so we get mine.name
-    .lean();
+  const companyObjectId = new Types.ObjectId(companyId);
+
+  const result = await Mine.aggregate([
+    {
+      $lookup: {
+        from: "companycredits",
+        localField: "_id",
+        foreignField: "mineId",
+        as: "credit",
+        pipeline: [{ $match: { companyId: companyObjectId } }],
+      },
+    },
+    {
+      $addFields: {
+        credit: { $arrayElemAt: ["$credit", 0] },
+      },
+    },
+    {
+      $project: {
+        id: "$_id",
+        mineId: "$_id",
+        mineName: "$name",
+        creditId: "$credit._id",
+        creditLimit: { $ifNull: ["$credit.creditLimit", 0] },
+        usedCredit: { $ifNull: ["$credit.usedCredit", 0] },
+      },
+    },
+  ]);
+
+  return result;
 }
 
 export async function updateCompanyCreditService(
