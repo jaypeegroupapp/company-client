@@ -3,7 +3,13 @@ import { decrypt } from "@/lib/session";
 import { cookies } from "next/headers";
 
 // 🔐 Protected pages (DO NOT include "/" here)
-const protectedRoutes = ["/trucks", "/orders"];
+const protectedRoutes = [
+  "/trucks",
+  "/orders",
+  "/profile",
+  "company-invoices",
+  "truck-orders",
+];
 
 // 🌐 Public pages
 const publicRoutes = ["/login", "/register"];
