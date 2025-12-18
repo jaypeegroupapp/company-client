@@ -29,10 +29,7 @@ export async function getCompanyDashboardSummaryService(companyId: string) {
     totalOrders,
     totalTrucks,
     totalCompanyInvoices,
-    credit: {
-      limit: company?.creditLimit || 0,
-      balance: company?.debitAmount || 0,
-    },
+    debitAmount: company?.debitAmount,
   };
 }
 

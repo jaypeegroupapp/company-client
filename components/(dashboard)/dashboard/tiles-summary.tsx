@@ -16,12 +16,7 @@ export default function TilesSummary({ data }: { data: any }) {
     {
       icon: Wallet,
       label: "Account Balance",
-      value: `R${data.credit.balance}`,
-    },
-    {
-      icon: Wallet,
-      label: "Credit Limit",
-      value: `R${data.credit.limit}`,
+      value: `R${data.debitAmount}`,
     },
   ];
 
