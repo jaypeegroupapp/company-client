@@ -50,7 +50,7 @@ export function ReviewStep({
   const sellingPrice = selectedProduct.sellingPrice ?? 0;
   const purchasePrice = selectedProduct.purchasePrice ?? 0;
   const accountBalance =
-    debit.debitAmount - (selectedMine.creditLimit - selectedMine.usedCredit);
+    debit.debitAmount + (selectedMine.creditLimit - selectedMine.usedCredit);
 
   const getQuantity = (truckId?: string) =>
     truckId ? Number(quantities?.[truckId] || 0) : 0;
