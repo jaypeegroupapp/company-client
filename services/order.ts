@@ -16,7 +16,7 @@ export async function getOrdersService(userId: string) {
   try {
     const orders = await Order.find({ userId })
       .populate("userId", "fullName email")
-      .populate("companyId", "companyName")
+      .populate("companyId", "name")
       .populate("productId", "name price")
       .sort({ createdAt: -1 })
       .lean();

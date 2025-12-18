@@ -38,7 +38,7 @@ export function ProfileClient({ user, company }: Props) {
       <div className="border-t border-gray-100 pt-6 space-y-4">
         <div>
           <p className="text-sm text-gray-600">Full Name</p>
-          <p className="text-gray-900 font-medium">{company?.companyName || "—"}</p>
+          <p className="text-gray-900 font-medium">{company?.name || "—"}</p>
         </div>
 
         <div>

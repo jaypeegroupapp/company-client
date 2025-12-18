@@ -22,7 +22,7 @@ export async function registerCompanyAction(
       };
     }
     const {
-      companyName,
+      name,
       registrationNumber,
       contactEmail,
       contactPhone,
@@ -53,7 +53,7 @@ export async function registerCompanyAction(
     const userId = session?.userId as string;
 
     const companyId = await createCompanyService({
-      companyName,
+      name,
       registrationNumber,
       contactEmail,
       contactPhone,

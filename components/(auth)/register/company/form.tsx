@@ -29,7 +29,7 @@ const CompanyForm = () => {
   } = useForm<CompanyFormData>({
     resolver: zodResolver(companyFormSchema),
     defaultValues: {
-      companyName: "",
+      name: "",
       registrationNumber: "",
       contactEmail: "",
       contactPhone: "",

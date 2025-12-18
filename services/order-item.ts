@@ -116,7 +116,7 @@ export async function getAllOrderItemsService(companyId: string) {
         model: "$truck.model",
         year: "$truck.year",
 
-        companyName: "$company.companyName",
+        companyName: "$company.name",
         productName: "$product.name",
       },
     },

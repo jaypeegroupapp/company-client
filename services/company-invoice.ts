@@ -19,7 +19,7 @@ export async function getCompanyInvoicesService() {
       companyId,
       status: { $ne: "pending" },
     })
-      .populate("companyId", "companyName")
+      .populate("companyId", "name")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -59,7 +59,7 @@ export async function getCompanyInvoiceByIdService(id: string) {
 
   try {
     const invoice = await CompanyInvoice.findById(id)
-      .populate("companyId", "companyName")
+      .populate("companyId", "name")
       .lean();
 
     return invoice ? JSON.parse(JSON.stringify(invoice)) : null;
