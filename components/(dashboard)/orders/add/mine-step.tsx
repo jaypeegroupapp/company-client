@@ -20,7 +20,7 @@ export function MineStep({
   onNext,
 }: {
   selectedMine: ICompanyCredit | null;
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
   setSelectedMine: (m: ICompanyCredit) => void;
   onNext: () => void;
 }) {

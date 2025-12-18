@@ -13,7 +13,6 @@ export default async function OrdersPage() {
       initialOrders={orders || []}
       debit={{
         debitAmount: company?.debitAmount || 0,
-        usedDebit: company?.usedDebit || 0,
       }}
     />
   );

@@ -66,7 +66,7 @@ export async function updateCompanyCreditService(
     );
     if (!companyCredit) throw new Error("Company credit not found");
 
-    const debitBalance = company.debitAmount - company.usedDebit;
+    const debitBalance = company.debitAmount;
     const creditBalance = companyCredit.creditLimit - companyCredit.usedCredit;
 
     if (debitBalance + creditBalance < data.amount) {
@@ -74,17 +74,11 @@ export async function updateCompanyCreditService(
     }
 
     // Calculate how much to deduct from debit and credit
-    let debitUsed = 0;
-    let creditUsed = 0;
-
     if (debitBalance >= data.amount) {
-      debitUsed = data.amount;
-      company.usedDebit += debitUsed;
+      company.debitAmount -= data.amount;
     } else {
-      debitUsed = debitBalance;
-      creditUsed = data.amount - debitBalance;
-      company.usedDebit += debitUsed;
-      companyCredit.usedCredit += creditUsed;
+      company.debitAmount -= debitBalance;
+      companyCredit.usedCredit += data.amount - debitBalance;
     }
 
     const oldBalance = debitBalance + creditBalance;

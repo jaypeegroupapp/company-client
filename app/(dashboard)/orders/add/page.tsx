@@ -10,7 +10,6 @@ export default async function AddOrderPage() {
     <AddOrderClient
       debit={{
         debitAmount: company?.debitAmount || 0,
-        usedDebit: company?.usedDebit || 0,
       }}
     />
   );

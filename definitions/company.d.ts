@@ -12,7 +12,6 @@ export interface ICompany {
   creditLimit?: number; // Total credit approved
   balance?: number; // Remaining available credit
   debitAmount: number;
-  usedDebit: number;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

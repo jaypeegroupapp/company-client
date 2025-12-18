@@ -22,7 +22,7 @@ export function ReviewStep({
   selectedProduct: IProduct | null;
   selectedTrucks: ITruck[];
   quantities: any;
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
   collectionDate: string;
   setCollectionDate: (d: string) => void;
   onBack: () => void;
@@ -49,10 +49,8 @@ export function ReviewStep({
 
   const sellingPrice = selectedProduct.sellingPrice ?? 0;
   const purchasePrice = selectedProduct.purchasePrice ?? 0;
-  const balance =
-    debit.debitAmount -
-    debit.usedDebit +
-    (selectedMine.creditLimit - selectedMine.usedCredit);
+  const accountBalance =
+    debit.debitAmount - (selectedMine.creditLimit - selectedMine.usedCredit);
 
   const getQuantity = (truckId?: string) =>
     truckId ? Number(quantities?.[truckId] || 0) : 0;
@@ -76,7 +74,7 @@ export function ReviewStep({
     }));
 
   // 🚨 BALANCE VALIDATION
-  const insufficientBalance = total > balance;
+  const insufficientBalance = total > accountBalance;
 
   const handleSubmit = async () => {
     try {
@@ -87,6 +85,13 @@ export function ReviewStep({
         setMessage("❌ You do not have enough credit to complete this order.");
         return;
       }
+      let debitPaid = total;
+      let creditUsed = 0;
+
+      if (total > debit.debitAmount) {
+        debitPaid = debit.debitAmount;
+        creditUsed = total - debit.debitAmount;
+      }
 
       const orderData = {
         mineId: selectedMine.mineId,
@@ -96,10 +101,9 @@ export function ReviewStep({
         purchasePrice,
         sellingPrice,
         items: orderItems,
+        debit: debitPaid,
+        credit: creditUsed,
       };
-
-      console.log("orderData:", orderData);
-      console.log({ selectedMine });
 
       const formData = new FormData();
       formData.append("orderData", JSON.stringify(orderData));
@@ -187,11 +191,11 @@ export function ReviewStep({
           </p>
         </div>
 
-        {/* ❌ Insufficient balance error */}
+        {/* ❌ Insufficient accountBalance error */}
         {insufficientBalance && (
           <p className="text-red-600 text-sm font-medium mt-2">
             ❌ You do not have enough credit to place this order. (Available: R
-            {balance.toFixed(2)} | Needed: R{total.toFixed(2)})
+            {accountBalance.toFixed(2)} | Needed: R{total.toFixed(2)})
           </p>
         )}
       </div>

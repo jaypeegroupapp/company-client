@@ -15,7 +15,7 @@ export function QuantityStep({
   selectedMine: ICompanyCredit | null;
   selectedTrucks: ITruck[];
   quantities: { [truckId: string]: number };
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
   setQuantities: (q: any) => void;
   onNext: () => void;
   onBack: () => void;

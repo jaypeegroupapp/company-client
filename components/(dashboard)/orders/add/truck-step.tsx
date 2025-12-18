@@ -20,7 +20,7 @@ export function TruckStep({
 }: {
   selectedMine: ICompanyCredit | null;
   selectedTrucks: ITruck[];
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
   setSelectedTrucks: (t: any[]) => void;
   onNext: () => void;
   onBack: () => void;

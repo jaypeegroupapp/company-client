@@ -17,7 +17,7 @@ export function ProductStep({
 }: {
   selectedMine: ICompanyCredit | null;
   selectedProduct: IProduct | null;
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
   setSelectedProduct: (p: any) => void;
   onNext: () => void;
   onBack: () => void;

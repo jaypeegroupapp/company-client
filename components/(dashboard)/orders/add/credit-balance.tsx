@@ -6,10 +6,9 @@ const CreditBalance = ({
   debit,
   selectedMine,
 }: {
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
   selectedMine: ICompanyCredit | null;
 }) => {
-  const balance = debit.debitAmount - debit.usedDebit;
   const creditBalance = selectedMine
     ? selectedMine.creditLimit - selectedMine.usedCredit
     : null;
@@ -18,7 +17,7 @@ const CreditBalance = ({
     <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-lg text-sm">
       <Wallet size={16} className="text-gray-600" />
       <span className="text-gray-700">
-        Debit Balance: <strong>R{balance}</strong>
+        Debit Balance: <strong>R{debit.debitAmount}</strong>
         {creditBalance && (
           <>
             / Credit Balance: <strong>R{creditBalance}</strong>

@@ -17,7 +17,7 @@ import { ICompanyCredit } from "@/definitions/company-credit";
 export default function AddOrderClient({
   debit,
 }: {
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
 }) {
   const [step, setStep] = useState(1);
 

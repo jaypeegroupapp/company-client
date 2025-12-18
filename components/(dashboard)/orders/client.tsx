@@ -12,7 +12,7 @@ import { OrderTabs } from "./tabs";
 
 interface Props {
   initialOrders: IOrder[];
-  debit: { debitAmount: number; usedDebit: number };
+  debit: { debitAmount: number };
 }
 
 export function OrderClientPage({ initialOrders, debit }: Props) {
