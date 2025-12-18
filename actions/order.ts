@@ -26,6 +26,8 @@ export async function createOrderAction(formData: FormData) {
       sellingPrice,
       purchasePrice,
       mineId,
+      debit,
+      credit,
     } = validated.data;
 
     const session = await verifySession();
@@ -59,6 +61,8 @@ export async function createOrderAction(formData: FormData) {
       items,
       sellingPrice,
       purchasePrice,
+      debit,
+      credit,
     });
 
     if (!result.success) {

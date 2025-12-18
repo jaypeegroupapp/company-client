@@ -62,6 +62,16 @@ const OrderSchema = new Schema<IOrderDoc>(
       required: true,
       min: 0,
     },
+    debit: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    credit: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
     collectionDate: {
       type: Date,
       required: true,

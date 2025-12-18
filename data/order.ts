@@ -5,8 +5,8 @@ import {
   getOrderByIdService,
   getInvoiceOrdersService,
 } from "@/services/order";
-import { m } from "framer-motion";
 import { redirect } from "next/navigation";
+import { mapOrder } from "./mapper";
 
 /**
  * 🧾 Fetch all orders and map to UI-friendly format
@@ -21,18 +21,7 @@ export async function getOrders() {
 
     const orders = await getOrdersService(userId);
 
-    return orders.map((order: any) => ({
-      id: order._id.toString(),
-      userId: order.userId?._id || "",
-      companyId: order.companyId?._id || "",
-      productId: order.productId?._id || "",
-      productName: order.productId?.name || "N/A",
-      totalAmount: order.totalAmount,
-      collectionDate: order.collectionDate,
-      status: order.status,
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
-    }));
+    return orders.map(mapOrder);
   } catch (err) {
     console.error("❌ getOrders error:", err);
     return [];
@@ -61,22 +50,7 @@ export async function getOrderById(id: string) {
 
     // 🧱 Return serializable structure
     return {
-      id: order._id.toString(),
-      userId: order.userId?._id?.toString() || "",
-      userName: order.userId?.fullName || "",
-      mineId: order.mineId?._id?.toString() || "",
-      mineName: order.mineId?.name || "",
-      companyId: order.companyId?._id?.toString() || "",
-      companyName: order.companyId?.name || "",
-      productId: order.productId?._id?.toString() || "",
-      productName: order.productId?.name || "N/A",
-      totalAmount: Number(order.totalAmount || 0),
-      collectionDate: order.collectionDate
-        ? new Date(order.collectionDate).toISOString()
-        : "",
-      status: order.status || "pending",
-      createdAt: order.createdAt ? new Date(order.createdAt).toISOString() : "",
-      updatedAt: order.updatedAt ? new Date(order.updatedAt).toISOString() : "",
+      ...mapOrder(order),
       items,
     };
   } catch (err) {

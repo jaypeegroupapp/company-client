@@ -72,6 +72,8 @@ export async function createOrderService(data: CreateOrderInput) {
           companyId: new Types.ObjectId(data.companyId),
           productId: new Types.ObjectId(data.productId),
           totalAmount: data.totalAmount,
+          debit: data.debit,
+          credit: data.credit,
           collectionDate: new Date(data.collectionDate),
           status: data.status || "pending",
           sellingPrice: data.sellingPrice,
