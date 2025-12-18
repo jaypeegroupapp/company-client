@@ -18,7 +18,7 @@ const CreditBalance = ({
       <Wallet size={16} className="text-gray-600" />
       <span className="text-gray-700">
         Debit Balance: <strong>R{debit.debitAmount}</strong>
-        {creditBalance && (
+        {creditBalance !== null && (
           <>
             / Credit Balance: <strong>R{creditBalance}</strong>
           </>
