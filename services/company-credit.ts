@@ -42,6 +42,7 @@ export async function getCompanyCreditsByCompanyIdService(companyId: string) {
 
 export async function updateCompanyCreditService(
   companyId: string,
+  mineId: string,
   data: {
     amount: number;
     reason?: string;
@@ -61,9 +62,10 @@ export async function updateCompanyCreditService(
     const company = await Company.findById(companyId).session(session);
     if (!company) throw new Error("Company not found");
 
-    const companyCredit = await CompanyCredit.findOne({ companyId }).session(
-      session
-    );
+    const companyCredit = await CompanyCredit.findOne({
+      companyId,
+      mineId,
+    }).session(session);
     if (!companyCredit) throw new Error("Company credit not found");
 
     const debitBalance = company.debitAmount;

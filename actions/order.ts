@@ -37,7 +37,7 @@ export async function createOrderAction(formData: FormData) {
     const companyId = session.companyId as string;
 
     // 1️⃣ Check company balance
-    const companyCredit = await updateCompanyCreditService(companyId, {
+    const companyCredit = await updateCompanyCreditService(companyId, mineId, {
       amount: totalAmount, // Deduct order total
       reason: `Order payment for product ${productId}`,
       type: "order-debit",
@@ -67,7 +67,7 @@ export async function createOrderAction(formData: FormData) {
 
     if (!result.success) {
       // Rollback balance if order creation failed
-      await updateCompanyCreditService(companyId, {
+      await updateCompanyCreditService(companyId, mineId, {
         amount: totalAmount, // Refund the amount
         reason: `Rollback failed order ${result.orderId}`,
         type: "credit-updated",
