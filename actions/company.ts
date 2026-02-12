@@ -32,7 +32,7 @@ export async function registerCompanyAction(
     } = validated.data;
     console.log("invoiceFile", invoiceFile);
 
-    let fileId = "";
+    /* let fileId = "";
 
     if (invoiceFile && invoiceFile.size > 0) {
       const fileFormData = new FormData();
@@ -45,7 +45,7 @@ export async function registerCompanyAction(
       }
 
       fileId = uploadData.filename || "";
-    }
+    } */
 
     const session = await verifySession();
     if (!session) return null;
@@ -59,7 +59,7 @@ export async function registerCompanyAction(
       contactPhone,
       billingAddress,
       vatNumber,
-      invoiceFile: fileId,
+      // invoiceFile: fileId,
       userId,
     });
 
@@ -74,5 +74,5 @@ export async function registerCompanyAction(
     };
   }
 
-  redirect("/");
+  redirect("/trucks");
 }

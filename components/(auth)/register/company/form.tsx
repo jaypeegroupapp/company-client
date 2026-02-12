@@ -72,7 +72,7 @@ const CompanyForm = () => {
         ))}
 
         {/* ✅ File Upload */}
-        <div className="flex flex-col mb-4">
+        {/* <div className="flex flex-col mb-4">
           <label
             htmlFor="invoiceFile"
             className="text-sm font-medium text-gray-700 mb-1"
@@ -87,7 +87,7 @@ const CompanyForm = () => {
                        file:border-0 file:bg-black file:text-white hover:file:bg-gray-800 
                        bg-gray-100 rounded-full p-1 focus:outline-none"
           />
-        </div>
+        </div> */}
         {state?.errors && (
           <p className="text-red-600 text-center text-sm mt-3">
             {(() => {

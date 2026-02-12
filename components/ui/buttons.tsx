@@ -10,7 +10,7 @@ export const SubmitButton = ({ name, isPending }: Props) => {
     <button
       type="submit"
       disabled={isPending}
-      className="mt-2 w-full py-2.5 rounded-full bg-black text-white font-semibold hover:bg-gray-200 transition"
+      className="mt-2 w-full py-2.5 rounded-full bg-black text-white font-semibold hover:bg-gray-400 transition"
     >
       {isPending ? "Loading..." : name}
     </button>
