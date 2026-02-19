@@ -18,11 +18,11 @@ export const months = [
 export const navItems = [
   { name: "Dashboard", href: "/", icon: Home },
   { name: "Orders", href: "/orders", icon: PackageCheck },
-  { name: "Truck Orders", href: "/truck-orders", icon: Truck },
+  { name: "Orders By Trucks", href: "/truck-orders", icon: Truck },
 ];
 
 export const otherNavItems = [
   { name: "Company Invoices", href: "/company-invoices", icon: FileText },
-  { name: "Trucks", href: "/trucks", icon: Truck },
+  { name: "Manage Trucks", href: "/trucks", icon: Truck },
   { name: "Profile", href: "/profile", icon: User },
 ];
