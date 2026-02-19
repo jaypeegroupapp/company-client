@@ -4,12 +4,12 @@ import { connectDB } from "@/lib/db";
 
 import Order from "@/models/order";
 import Truck from "@/models/truck";
-import Product from "@/models/product";
 import Mine from "@/models/mine";
 import CompanyInvoice from "@/models/company-invoice";
 import { Types } from "mongoose";
 import { getCompanyDetails } from "@/data/company";
 import { getCompanyByIdService } from "./company";
+import MineInvoice from "@/models/mine-invoice";
 
 /* -----------------------------------------------------
    0. DASHBOARD SUMMARY
@@ -17,18 +17,40 @@ import { getCompanyByIdService } from "./company";
 export async function getCompanyDashboardSummaryService(companyId: string) {
   await connectDB();
 
-  const [totalOrders, totalTrucks, totalCompanyInvoices, company] =
+  // 📅 Current month date range
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [totalOrders, totalTrucks, publishedMineInvoiceTotal, company] =
     await Promise.all([
       Order.countDocuments({ companyId }),
       Truck.countDocuments({ companyId, isActive: true }),
-      CompanyInvoice.countDocuments({ companyId, status: "published" }),
+
+      // ✅ SUM of published mine invoices this month
+      MineInvoice.aggregate([
+        {
+          $match: {
+            companyId: new Types.ObjectId(companyId),
+            status: { $in: ["published"] },
+            createdAt: { $gte: startOfMonth, $lte: now },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$totalAmount" },
+          },
+        },
+      ]),
+
       getCompanyByIdService(companyId),
     ]);
 
   return {
     totalOrders,
     totalTrucks,
-    totalCompanyInvoices,
+    totalPublishedMineInvoicesThisMonth:
+      publishedMineInvoiceTotal[0]?.total || 0,
     debitAmount: company?.debitAmount,
   };
 }

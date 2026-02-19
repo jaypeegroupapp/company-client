@@ -10,8 +10,8 @@ export default function TilesSummary({ data }: { data: any }) {
     },
     {
       icon: FileText,
-      label: "Company Invoices",
-      value: data.totalCompanyInvoices,
+      label: "Invoice This Month",
+      value: "R " + data.totalPublishedMineInvoicesThisMonth,
     },
     {
       icon: Wallet,

@@ -68,7 +68,7 @@ export default async function CompanyDashboardPage() {
         />
 
         <LineChartCard
-          title="Company Invoice Revenue (Monthly)"
+          title="Invoice Expenditure (Monthly)"
           data={monthlyCompanyInvoices}
           dataKey="total"
         />
