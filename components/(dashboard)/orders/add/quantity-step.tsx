@@ -81,13 +81,16 @@ export function QuantityStep({
               </div>
 
               <input
-              type="number"
-              min={1}
-              value={quantities[truckId ?? ""] || ""}
-              onChange={(e) => handleQuantityChange(truckId ?? "", e.target.value)}
-              className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-700"
-              placeholder="Litres"
-            />
+                type="number"
+                min={1}
+                max={truck.tankSize}
+                value={quantities[truckId ?? ""] || truck.tankSize}
+                onChange={(e) =>
+                  handleQuantityChange(truckId ?? "", e.target.value)
+                }
+                className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-700"
+                placeholder="Litres"
+              />
               {/* RIGHT — Dropdown Quantity */}
               {/* <select
                 value={selectValue}
