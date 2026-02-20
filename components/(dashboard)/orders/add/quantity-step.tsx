@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { ITruck } from "@/definitions/truck";
 import CreditBalance from "./credit-balance";
 import { ICompanyCredit } from "@/definitions/company-credit";
@@ -20,33 +21,48 @@ export function QuantityStep({
   onNext: () => void;
   onBack: () => void;
 }) {
-  const handleQuantityChange = (truckId: string, value: string) => {
+  const [errors, setErrors] = useState<{ [truckId: string]: string }>({});
+
+  const handleQuantityChange = (
+    truckId: string,
+    value: string,
+    tankSize?: number,
+  ) => {
+    const numericValue = Number(value);
+
+    // Update quantity immediately (so typing feels natural)
     setQuantities({
       ...quantities,
-      [truckId]: Number(value),
+      [truckId]: numericValue,
     });
+
+    // Validation
+    if (!value) {
+      setErrors((prev) => ({ ...prev, [truckId]: "Quantity is required" }));
+      return;
+    }
+
+    if (tankSize && numericValue > tankSize) {
+      setErrors((prev) => ({
+        ...prev,
+        [truckId]: `Cannot exceed tank size of ${tankSize}ℓ`,
+      }));
+    } else {
+      // Clear error when valid
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[truckId];
+        return updated;
+      });
+    }
   };
 
-  const buildOptions = (tankSize?: number) => {
-    if (!tankSize) return [];
-
-    const full = tankSize;
-    const half = tankSize / 2;
-    const quarter = tankSize / 4;
-
-    return [
-      { label: `Full - ${full}`, value: full },
-      { label: `Half - ${half}`, value: half },
-      { label: `Quarter - ${quarter}`, value: quarter },
-    ];
-  };
-
-  const canContinue = selectedTrucks.every((truck) => {
-    if (!truck.id) return false;
-
-    const quantity = quantities[truck.id];
-    return typeof quantity === "number" && quantity > 0;
-  });
+  const canContinue =
+    selectedTrucks.every((truck) => {
+      if (!truck.id) return false;
+      const quantity = quantities[truck.id];
+      return typeof quantity === "number" && quantity > 0;
+    }) && Object.keys(errors).length === 0;
 
   return (
     <div className="space-y-6">
@@ -57,56 +73,49 @@ export function QuantityStep({
 
       <div className="space-y-4">
         {selectedTrucks.map((truck, index) => {
-          const options = buildOptions(truck.tankSize);
           const truckId = truck.id;
-          const quantity = truckId ? quantities[truckId] : undefined;
-          const selectValue =
-            typeof quantity === "number" ? String(quantity) : "";
+          const error = truckId ? errors[truckId] : undefined;
 
           return (
             <div
               key={truckId ?? `truck-${index}`}
-              className="border border-gray-200 rounded-xl p-4 flex justify-between items-center"
+              className="border border-gray-200 rounded-xl p-4"
             >
-              {/* LEFT — Truck Details */}
-              <div className="space-y-1">
-                <p className="font-medium text-gray-800">
-                  {truck.plateNumber} - {truck.make} {truck.model} ({truck.year}
-                  )
-                </p>
+              {/* Truck Info */}
+              <div className="flex justify-between items-center">
+                <div className="space-y-1">
+                  <p className="font-medium text-gray-800">
+                    {truck.plateNumber} - {truck.make} {truck.model} (
+                    {truck.year})
+                  </p>
 
-                <p className="text-xs font-medium text-gray-700">
-                  Tank Size: {truck.tankSize} ℓ
-                </p>
+                  <p className="text-xs font-medium text-gray-700">
+                    Tank Size: {truck.tankSize} ℓ
+                  </p>
+                </div>
+
+                <input
+                  type="number"
+                  min={1}
+                  value={quantities[truckId ?? ""] || ""}
+                  onChange={(e) =>
+                    handleQuantityChange(
+                      truckId ?? "",
+                      e.target.value,
+                      truck.tankSize,
+                    )
+                  }
+                  className={`w-28 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
+                    error
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-gray-700"
+                  }`}
+                  placeholder="Litres"
+                />
               </div>
 
-              <input
-                type="number"
-                min={1}
-                max={truck.tankSize}
-                value={quantities[truckId ?? ""] || truck.tankSize}
-                onChange={(e) =>
-                  handleQuantityChange(truckId ?? "", e.target.value)
-                }
-                className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-700"
-                placeholder="Litres"
-              />
-              {/* RIGHT — Dropdown Quantity */}
-              {/* <select
-                value={selectValue}
-                onChange={(e) =>
-                  truckId && handleQuantityChange(truckId, e.target.value)
-                }
-                disabled={!truckId}
-                className="w-32 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-gray-700"
-              >
-                <option value="">Select Litres</option>
-                {options.map((o) => (
-                  <option key={o.label} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select> */}
+              {/* Error Message */}
+              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
             </div>
           );
         })}
