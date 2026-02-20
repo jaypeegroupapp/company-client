@@ -4,6 +4,7 @@ import {
   getOrdersService,
   getOrderByIdService,
   getInvoiceOrdersService,
+  getMineInvoiceOrdersService,
 } from "@/services/order";
 import { redirect } from "next/navigation";
 import { mapOrder } from "./mapper";
@@ -87,9 +88,12 @@ export async function getInvoiceOrders(invoiceId: string) {
 export async function getMineInvoiceOrders(invoiceId: string) {
   try {
     const orders = await getInvoiceOrdersService(invoiceId);
+    const mineOrders = await getMineInvoiceOrdersService(invoiceId);
+
     if (!orders.length) return [];
 
-    return orders.map((order: any) => {
+    return mineOrders;
+    /* return orders.map((order: any) => {
       const mappedItems = order.items.map((item: any) => ({
         id: item._id.toString(),
         truckName: item.truckId?.plateNumber || "Unknown Truck",
@@ -100,7 +104,7 @@ export async function getMineInvoiceOrders(invoiceId: string) {
         ...mapOrder(order),
         items: mappedItems,
       };
-    });
+    }); */
   } catch (err) {
     console.error("❌ getInvoiceOrders error:", err);
     return [];

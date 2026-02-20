@@ -80,7 +80,7 @@ export async function createOrderService(data: CreateOrderInput) {
           purchasePrice: data.purchasePrice,
         },
       ],
-      { session }
+      { session },
     );
 
     // 2️⃣ Create related order items
@@ -139,7 +139,7 @@ export async function deleteOrderService(orderId: string) {
  */
 export async function updateCollectionDateService(
   orderId: string,
-  collectionDate: string
+  collectionDate: string,
 ) {
   await connectDB();
 
@@ -183,8 +183,78 @@ export async function getInvoiceOrdersService(invoiceId: string) {
         id: order._id.toString(),
         items,
       };
-    })
+    }),
   );
 
   return finalOrders;
+}
+
+export async function getMineInvoiceOrdersService(invoiceId: string) {
+  await connectDB();
+
+  const results = await OrderItem.aggregate([
+    // 1️⃣ Join Orders
+    {
+      $lookup: {
+        from: "orders",
+        localField: "orderId",
+        foreignField: "_id",
+        as: "order",
+      },
+    },
+    { $unwind: "$order" },
+
+    // 2️⃣ Filter by invoiceId
+    {
+      $match: {
+        "order.invoiceId": new Types.ObjectId(invoiceId),
+      },
+    },
+
+    // 3️⃣ Join Trucks
+    {
+      $lookup: {
+        from: "trucks",
+        localField: "truckId",
+        foreignField: "_id",
+        as: "truck",
+      },
+    },
+    { $unwind: "$truck" },
+
+    // 4️⃣ Final Shape
+    {
+      $project: {
+        _id: 0,
+        id: { $toString: "$_id" },
+        orderId: { $toString: "$orderId" },
+        updateDate: "$updatedAt",
+        quantity: "$quantity",
+        sellingPrice: "$order.sellingPrice",
+        truckId: {
+          name: {
+            $cond: [
+              {
+                $and: [
+                  { $ifNull: ["$truck.make", false] },
+                  { $ifNull: ["$truck.model", false] },
+                ],
+              },
+              { $concat: ["$truck.make", " ", "$truck.model"] },
+              "$truck.plateNumber",
+            ],
+          },
+          plateNumber: "$truck.plateNumber",
+          registrationNumber: "$truck.registrationNumber",
+        },
+      },
+    },
+
+    // 5️⃣ Sort newest first
+    {
+      $sort: { updateDate: -1 },
+    },
+  ]);
+
+  return results;
 }

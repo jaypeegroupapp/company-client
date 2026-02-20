@@ -17,6 +17,59 @@ export function InvoiceOrdersList({ orders }: { orders: IOrder[] }) {
         Linked Orders
       </h3>
 
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left text-gray-500">
+              <th className="pb-3">Order</th>
+              <th className="pb-3 text-right">Total</th>
+              <th className="pb-3 text-right">Debit</th>
+              <th className="pb-3 text-right">Credit</th>
+              <th className="pb-3 text-right">Outstanding</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => {
+              const outstanding =
+                order.totalAmount - order.debit - order.credit;
+
+              return (
+                <tr
+                  key={order.id}
+                  className="border-b last:border-none hover:bg-gray-50 transition"
+                >
+                  <td className="py-4 font-semibold">
+                    #{order.id?.slice(-6).toUpperCase()}
+                  </td>
+
+                  <td className="py-4">{order.mineName}</td>
+
+                  <td className="py-4">
+                    <InvoiceStatusBadge status={order.status} />
+                  </td>
+
+                  <td className="py-4 text-right font-medium">
+                    R {order.totalAmount.toFixed(2)}
+                  </td>
+
+                  <td className="py-4 text-right text-purple-600">
+                    R {order.debit.toFixed(2)}
+                  </td>
+
+                  <td className="py-4 text-right text-orange-600">
+                    R {order.credit.toFixed(2)}
+                  </td>
+
+                  <td className="py-4 text-right text-red-600 font-medium">
+                    R {outstanding.toFixed(2)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
       {orders.length === 0 ? (
         <p className="text-sm text-gray-500">No orders linked.</p>
       ) : (
