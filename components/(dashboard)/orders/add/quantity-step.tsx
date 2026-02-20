@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ITruck } from "@/definitions/truck";
 import CreditBalance from "./credit-balance";
 import { ICompanyCredit } from "@/definitions/company-credit";
@@ -63,6 +63,17 @@ export function QuantityStep({
       const quantity = quantities[truck.id];
       return typeof quantity === "number" && quantity > 0;
     }) && Object.keys(errors).length === 0;
+
+  useEffect(() => {
+    for (const truck of selectedTrucks) {
+      if (truck.id && !quantities[truck.id]) {
+        setQuantities((prev: any) => ({
+          ...prev,
+          [truck.id as string]: truck.tankSize,
+        }));
+      }
+    }
+  }, [selectedTrucks]);
 
   return (
     <div className="space-y-6">
