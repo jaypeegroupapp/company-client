@@ -83,3 +83,26 @@ export async function getInvoiceOrders(invoiceId: string) {
     return [];
   }
 }
+
+export async function getMineInvoiceOrders(invoiceId: string) {
+  try {
+    const orders = await getInvoiceOrdersService(invoiceId);
+    if (!orders.length) return [];
+
+    return orders.map((order: any) => {
+      const mappedItems = order.items.map((item: any) => ({
+        id: item._id.toString(),
+        truckName: item.truckId?.plateNumber || "Unknown Truck",
+        quantity: Number(item.quantity || 0),
+      }));
+
+      return {
+        ...mapOrder(order),
+        items: mappedItems,
+      };
+    });
+  } catch (err) {
+    console.error("❌ getInvoiceOrders error:", err);
+    return [];
+  }
+}

@@ -39,6 +39,7 @@ export function CompanyInvoiceClientPage({ initialInvoices }: Props) {
    --------------------------------*/
   const counts: Record<InvoiceTab, number> = {
     All: invoices.length,
+    Pending: invoices.filter((i) => i.status === "pending").length,
     Published: invoices.filter((i) => i.status === "published").length,
     Paid: invoices.filter((i) => i.status === "paid").length,
     Closed: invoices.filter((i) => i.status === "closed").length,

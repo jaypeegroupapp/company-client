@@ -22,7 +22,7 @@ export const navItems = [
 ];
 
 export const otherNavItems = [
-  { name: "Company Invoices", href: "/company-invoices", icon: FileText },
+  { name: "Mine Invoices", href: "/mine-invoices", icon: FileText },
   { name: "Manage Trucks", href: "/trucks", icon: Truck },
   { name: "Profile", href: "/profile", icon: User },
 ];

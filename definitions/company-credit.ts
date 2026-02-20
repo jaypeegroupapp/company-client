@@ -1,11 +1,14 @@
 // definitions/company-credit.ts
+// definitions/company-credit.ts
 export interface ICompanyCredit {
   id?: string;
   companyId?: string;
   mineId?: string;
-  mineName?: string;
   creditLimit: number;
   usedCredit: number; // recommended instead of spentSoFar
+  status?: "settled" | "owing";
+  mineName?: string;
+  companyName?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -20,3 +23,4 @@ export type CompanyCreditState = {
   };
   message?: string | null;
 };
+
