@@ -44,7 +44,7 @@ export function InvoiceOrdersTable({ data }: { data: InvoiceOrderItem[] }) {
                   <th className="pb-3">Plate</th>
                   <th className="pb-3 text-right">Qty</th>
                   <th className="pb-3 text-right">Total</th>
-                  <th className="pb-3 text-right">Updated</th>
+                  <th className="pb-3 text-right">Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -71,7 +71,7 @@ export function InvoiceOrdersTable({ data }: { data: InvoiceOrderItem[] }) {
                         {formatCurrency(lineTotal)}
                       </td>
 
-                      <td className="py-4 text-right text-gray-500 text-xs">
+                      <td className="py-4 text-right text-gray-500">
                         {new Date(item.updateDate).toLocaleDateString()}
                       </td>
                     </tr>
