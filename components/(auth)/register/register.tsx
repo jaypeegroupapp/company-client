@@ -1,10 +1,18 @@
 "use client";
 
+import { div } from "framer-motion/client";
 // import Image from "next/image";
 import RegisterForm from "./form";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
-const Register = ({ companyId }: { companyId: string }) => {
+const Register = ({
+  companyId,
+  isRegistered,
+}: {
+  companyId: string;
+  isRegistered: boolean;
+}) => {
   return (
     <div className="flex h-[98vh] items-center justify-center bg-white text-white">
       <motion.main
@@ -29,7 +37,25 @@ const Register = ({ companyId }: { companyId: string }) => {
         <div className="absolute bottom-0 w-full bg-white text-black py-10 px-8 ">
           {/* rounded-t-[40px] */}
           <h3 className="font-mono text-xl mb-6 text-center">Register</h3>
-          <RegisterForm companyId={companyId} />
+          {isRegistered ? (
+            <div
+              className="bg-white border-l-4 border-gray-500 p-4 mb-4"
+              role="alert"
+            >
+              <p className="text-center text-sm text-gray-600 mb-4">
+                There's already an account registered for this company. Please
+                log in.
+              </p>
+              <Link
+                href="/login"
+                className="block w-full text-center bg-black text-white py-2 rounded-md hover:bg-gray-600 transition-colors duration-300"
+              >
+                Go to Login
+              </Link>
+            </div>
+          ) : (
+            <RegisterForm companyId={companyId} />
+          )}
         </div>
       </motion.main>
     </div>
