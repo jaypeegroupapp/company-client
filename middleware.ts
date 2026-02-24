@@ -47,9 +47,9 @@ export default async function middleware(req: NextRequest) {
   // ------------------------------------------
   // 📝 User logged-in but registration incomplete
   // ------------------------------------------
-  if (!isRegistration && registrationStep === "0") {
+  /* if (!isRegistration && registrationStep === "0") {
     return NextResponse.redirect(new URL("/register/company", req.nextUrl));
-  }
+  } */
 
   // ------------------------------------------
   // 🔄 Logged-in user should not see login/register again

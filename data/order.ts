@@ -93,18 +93,6 @@ export async function getMineInvoiceOrders(invoiceId: string) {
     if (!orders.length) return [];
 
     return mineOrders;
-    /* return orders.map((order: any) => {
-      const mappedItems = order.items.map((item: any) => ({
-        id: item._id.toString(),
-        truckName: item.truckId?.plateNumber || "Unknown Truck",
-        quantity: Number(item.quantity || 0),
-      }));
-
-      return {
-        ...mapOrder(order),
-        items: mappedItems,
-      };
-    }); */
   } catch (err) {
     console.error("❌ getInvoiceOrders error:", err);
     return [];

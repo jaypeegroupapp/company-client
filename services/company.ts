@@ -17,12 +17,16 @@ export async function createCompanyService(data: Partial<ICompany>) {
 // ✅ Update existing company
 export async function updateCompanyService(
   companyId: string,
-  data: Partial<ICompany>
+  data: Partial<ICompany>,
 ) {
   await connectDB();
-  const company = await Company.findByIdAndUpdate(companyId, data, {
-    new: true,
-  });
+  const company = await Company.findByIdAndUpdate(
+    companyId,
+    { ...data, userId: new Types.ObjectId(data.userId) },
+    {
+      new: true,
+    },
+  );
   return company;
 }
 

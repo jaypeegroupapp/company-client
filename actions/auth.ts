@@ -8,16 +8,18 @@ import {
 import bcrypt from "bcrypt";
 import { redirect } from "next/navigation";
 import { createSession, deleteSession, setCookie } from "@/lib/session";
-import { createUser, updateExistingUser } from "@/services/auth";
+import { createUser } from "@/services/auth";
 import { getUser, isUserExists } from "@/data/user";
 import { getCompany } from "@/data/company";
+import { updateCompanyService } from "@/services/company";
 
-export async function regsiterUser(
+export async function registerUser(
+  companyId: string,
   prevState: RegisterUserState | undefined,
-  formData: FormData
+  formData: FormData,
 ) {
   const validatedFields = registerUserformSchema.safeParse(
-    Object.fromEntries(formData)
+    Object.fromEntries(formData),
   );
 
   if (!validatedFields.success) {
@@ -46,21 +48,22 @@ export async function regsiterUser(
 
   try {
     const user = await createUser(email, hashedPassword);
-    await createSession({ userId: user.id });
+    await createSession({ userId: user.id, companyId });
+    await updateCompanyService(companyId, { userId: user.id });
     await setCookie("registrationStep", "0");
   } catch (error) {
     throw new Error("Error creating company:" + error);
   }
 
-  redirect("/register/company");
+  redirect("/trucks");
 }
 
 export async function loginUser(
   prevState: LoginUserState | undefined,
-  formData: FormData
+  formData: FormData,
 ) {
   const validatedFields = loginUserformSchema.safeParse(
-    Object.fromEntries(formData)
+    Object.fromEntries(formData),
   );
 
   if (!validatedFields.success) {

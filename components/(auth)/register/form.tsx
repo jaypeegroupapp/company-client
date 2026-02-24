@@ -9,17 +9,18 @@ import { registerFormData } from "@/constants/auth";
 import { startTransition, useActionState, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterUserForm, registerUserformSchema } from "@/validations/auth";
-import { regsiterUser } from "@/actions/auth";
+import { registerUser } from "@/actions/auth";
 
-const RegisterForm = () => {
+const RegisterForm = ({ companyId }: { companyId: string }) => {
   const initialState = {
     message: "",
     errors: {},
   };
 
+  const registerWithCompanyId = registerUser.bind(null, companyId);
   const [state, formAction, isPending] = useActionState(
-    regsiterUser,
-    initialState
+    registerWithCompanyId,
+    initialState,
   );
 
   const {

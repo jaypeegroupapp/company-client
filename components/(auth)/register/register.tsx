@@ -4,7 +4,7 @@
 import RegisterForm from "./form";
 import { motion } from "framer-motion";
 
-const Register = () => {
+const Register = ({ companyId }: { companyId: string }) => {
   return (
     <div className="flex h-[98vh] items-center justify-center bg-white text-white">
       <motion.main
@@ -29,7 +29,7 @@ const Register = () => {
         <div className="absolute bottom-0 w-full bg-white text-black py-10 px-8 ">
           {/* rounded-t-[40px] */}
           <h3 className="font-mono text-xl mb-6 text-center">Register</h3>
-          <RegisterForm />
+          <RegisterForm companyId={companyId} />
         </div>
       </motion.main>
     </div>
