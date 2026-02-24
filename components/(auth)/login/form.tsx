@@ -19,7 +19,7 @@ const LoginForm = () => {
 
   const [state, formAction, isPending] = useActionState(
     loginUser,
-    initialState
+    initialState,
   );
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -73,12 +73,12 @@ const LoginForm = () => {
         <p className="text-red-600 text-sm mt-2">{state.message}</p>
       )}
 
-      <p className="mt-5 text-sm text-center">
+      {/* <p className="mt-5 text-sm text-center">
         Don't have an account?{" "}
         <Link href="/register" className="text-gray-700 underline">
           Register here
         </Link>
-      </p>
+      </p> */}
     </motion.form>
   );
 };
