@@ -23,13 +23,24 @@ export const getCompany = cache(async (userData: any) => {
   return await getCompanyByUserId(userData);
 });
 
-export async function getCompanyDetails() {
+export async function getCompanySession() {
   try {
     const session = await verifySession();
     if (!session) return null;
 
     const companyId = session?.companyId as string;
 
+    const company = await getCompanyByIdService(companyId);
+    if (!company) return null;
+    return mapCompany(company);
+  } catch (error: any) {
+    console.error("❌ getCompanyById error:", error);
+    return null;
+  }
+}
+
+export async function getCompanyById(companyId: string) {
+  try {
     const company = await getCompanyByIdService(companyId);
     if (!company) return null;
     return mapCompany(company);

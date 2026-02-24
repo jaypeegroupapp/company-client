@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import { IMineInvoice } from "@/definitions/mine-invoice";
 import { InvoiceStatusBadge } from "./status-badge";
-import { getCompanyDetails } from "@/data/company";
+import { getCompanySession } from "@/data/company";
 import { ICompany } from "@/definitions/company";
 
 export function InvoiceSummary({
@@ -34,7 +34,7 @@ export function InvoiceSummary({
   }, []);
 
   const fetchCompany = async () => {
-    const company = await getCompanyDetails();
+    const company = await getCompanySession();
 
     /* if (res.success && res.data) {
       setCompanyDetails(res.data);

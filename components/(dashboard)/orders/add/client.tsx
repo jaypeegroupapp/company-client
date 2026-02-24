@@ -25,7 +25,7 @@ export default function AddOrderClient({
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [selectedTrucks, setSelectedTrucks] = useState<ITruck[]>([]);
   const [quantities, setQuantities] = useState<{ [truckId: string]: number }>(
-    {}
+    {},
   );
   const [collectionDate, setCollectionDate] = useState("");
 

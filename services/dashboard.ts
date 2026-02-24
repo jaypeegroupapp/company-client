@@ -7,7 +7,6 @@ import Truck from "@/models/truck";
 import Mine from "@/models/mine";
 import CompanyInvoice from "@/models/company-invoice";
 import { Types } from "mongoose";
-import { getCompanyDetails } from "@/data/company";
 import { getCompanyByIdService } from "./company";
 import MineInvoice from "@/models/mine-invoice";
 
