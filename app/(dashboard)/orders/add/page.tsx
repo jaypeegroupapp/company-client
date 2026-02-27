@@ -11,6 +11,8 @@ export default async function AddOrderPage() {
       debit={{
         debitAmount: company?.debitAmount || 0,
       }}
+      discountAmount={company?.discountAmount || 0}
+      isGridPlus={company?.isGridPlus || false}
     />
   );
 }

@@ -11,6 +11,8 @@ export function ProductStep({
   selectedMine,
   selectedProduct,
   debit,
+  discountAmount,
+  isGridPlus,
   setSelectedProduct,
   onNext,
   onBack,
@@ -18,6 +20,8 @@ export function ProductStep({
   selectedMine: ICompanyCredit | null;
   selectedProduct: IProduct | null;
   debit: { debitAmount: number };
+  discountAmount: number;
+  isGridPlus: boolean;
   setSelectedProduct: (p: any) => void;
   onNext: () => void;
   onBack: () => void;
@@ -40,24 +44,36 @@ export function ProductStep({
       </div>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map((product) => (
-          <motion.div
-            key={product.id}
-            whileHover={{ scale: 1.02 }}
-            onClick={() => setSelectedProduct(product)}
-            className={`border rounded-xl cursor-pointer p-4 transition-all ${
-              selectedProduct?.id === product.id
-                ? "border-gray-900 bg-gray-50"
-                : "border-gray-200 hover:border-gray-400"
-            }`}
-          >
-            <h3 className="font-medium text-gray-900">{product.name}</h3>
-            <p className="text-sm text-gray-500 mt-1">{product.description}</p>
-            <p className="text-sm font-semibold mt-2 text-gray-700">
-              R {product.sellingPrice.toFixed(2)}
-            </p>
-          </motion.div>
-        ))}
+        {products.map((product) => {
+          let sellingPrice = 0;
+
+          if (isGridPlus && discountAmount > 0) {
+            sellingPrice = product.grid + discountAmount;
+          } else {
+            sellingPrice = product.grid - discountAmount;
+          }
+
+          return (
+            <motion.div
+              key={product.id}
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setSelectedProduct(product)}
+              className={`border rounded-xl cursor-pointer p-4 transition-all ${
+                selectedProduct?.id === product.id
+                  ? "border-gray-900 bg-gray-50"
+                  : "border-gray-200 hover:border-gray-400"
+              }`}
+            >
+              <h3 className="font-medium text-gray-900">{product.name}</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {product.description}
+              </p>
+              <p className="text-sm font-semibold mt-2 text-gray-700">
+                R {sellingPrice.toFixed(2)}
+              </p>
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="pt-6 flex justify-between">

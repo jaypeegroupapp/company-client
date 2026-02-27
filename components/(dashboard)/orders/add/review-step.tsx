@@ -14,6 +14,8 @@ export function ReviewStep({
   selectedTrucks,
   quantities,
   debit,
+  discountAmount,
+  isGridPlus,
   collectionDate,
   setCollectionDate,
   onBack,
@@ -23,6 +25,8 @@ export function ReviewStep({
   selectedTrucks: ITruck[];
   quantities: any;
   debit: { debitAmount: number };
+  discountAmount: number;
+  isGridPlus: boolean;
   collectionDate: string;
   setCollectionDate: (d: string) => void;
   onBack: () => void;
@@ -47,11 +51,17 @@ export function ReviewStep({
     );
   }
 
-  const sellingPrice = selectedProduct.sellingPrice ?? 0;
-  const purchasePrice = selectedProduct.purchasePrice ?? 0;
+  const purchasePrice = selectedProduct.grid - (selectedProduct.discount || 0);
   const accountBalance =
     debit.debitAmount + (selectedMine.creditLimit - selectedMine.usedCredit);
 
+  let sellingPrice = 0;
+
+  if (isGridPlus && discountAmount > 0) {
+    sellingPrice = selectedProduct.grid + discountAmount;
+  } else {
+    sellingPrice = selectedProduct.grid - discountAmount;
+  }
   const getQuantity = (truckId?: string) =>
     truckId ? Number(quantities?.[truckId] || 0) : 0;
 
@@ -63,7 +73,7 @@ export function ReviewStep({
 
   const totalLitres = selectedTrucks.reduce(
     (acc, truck) => acc + getQuantity(truck.id),
-    0
+    0,
   );
 
   const orderItems = selectedTrucks

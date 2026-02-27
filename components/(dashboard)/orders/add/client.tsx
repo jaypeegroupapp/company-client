@@ -16,8 +16,12 @@ import { ICompanyCredit } from "@/definitions/company-credit";
 
 export default function AddOrderClient({
   debit,
+  discountAmount,
+  isGridPlus,
 }: {
   debit: { debitAmount: number };
+  discountAmount: number;
+  isGridPlus: boolean;
 }) {
   const [step, setStep] = useState(1);
 
@@ -101,6 +105,8 @@ export default function AddOrderClient({
                 selectedMine={selectedMine}
                 selectedProduct={selectedProduct}
                 debit={debit}
+                discountAmount={discountAmount}
+                isGridPlus={isGridPlus}
                 setSelectedProduct={setSelectedProduct}
                 onNext={nextStep}
                 onBack={prevStep}
@@ -161,6 +167,8 @@ export default function AddOrderClient({
                 selectedTrucks={selectedTrucks}
                 quantities={quantities}
                 debit={debit}
+                discountAmount={discountAmount}
+                isGridPlus={isGridPlus}
                 collectionDate={collectionDate}
                 setCollectionDate={setCollectionDate}
                 onBack={prevStep}
