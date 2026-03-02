@@ -7,6 +7,7 @@ export interface ICompanyCredit {
   creditLimit: number;
   usedCredit: number; // recommended instead of spentSoFar
   status?: "settled" | "owing";
+  isActive?: boolean;
   mineName?: string;
   companyName?: string;
   createdAt?: Date;
@@ -23,4 +24,3 @@ export type CompanyCreditState = {
   };
   message?: string | null;
 };
-

@@ -21,6 +21,11 @@ export async function getCompanyCreditsByCompanyIdService(companyId: string) {
       },
     },
     {
+      $match: {
+        "credit.isActive": true,
+      },
+    },
+    {
       $addFields: {
         credit: { $arrayElemAt: ["$credit", 0] },
       },
@@ -51,7 +56,7 @@ export async function updateCompanyCreditService(
       | "order-debit"
       | "invoice-paid"
       | "admin-adjustment";
-  }
+  },
 ) {
   await connectDB();
   const session = await mongoose.startSession();
@@ -100,7 +105,7 @@ export async function updateCompanyCreditService(
           description: data.reason || "Credit updated via system",
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -112,7 +117,7 @@ export async function updateCompanyCreditService(
     session.endSession();
     console.error("❌ updateCompanyCreditService failed:", error);
     throw new Error(
-      error instanceof Error ? error.message : "Transaction failed"
+      error instanceof Error ? error.message : "Transaction failed",
     );
   }
 }
