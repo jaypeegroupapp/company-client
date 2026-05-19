@@ -1,4 +1,6 @@
+// src/services/company-credit.ts
 import { connectDB } from "@/lib/db";
+import AccountStatementTrail from "@/models/account-statement-trail";
 import Company from "@/models/company";
 import CompanyCredit from "@/models/company-credit";
 import CompanyCreditTrail from "@/models/company-credit-trail";
@@ -10,19 +12,26 @@ export async function getCompanyCreditsByCompanyIdService(companyId: string) {
 
   const companyObjectId = new Types.ObjectId(companyId);
 
-  const result = await Mine.aggregate([
+  // Get all mines first
+  const allMines = await Mine.aggregate([
     {
       $lookup: {
         from: "companycredits",
-        localField: "_id",
-        foreignField: "mineId",
+        let: { mineId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$mineId", "$$mineId"] },
+                  { $eq: ["$companyId", companyObjectId] },
+                  { $eq: ["$isActive", true] },
+                ],
+              },
+            },
+          },
+        ],
         as: "credit",
-        pipeline: [{ $match: { companyId: companyObjectId } }],
-      },
-    },
-    {
-      $match: {
-        "credit.isActive": true,
       },
     },
     {
@@ -35,16 +44,25 @@ export async function getCompanyCreditsByCompanyIdService(companyId: string) {
         id: "$_id",
         mineId: "$_id",
         mineName: "$name",
-        creditId: "$credit._id",
+        creditId: { $ifNull: ["$credit._id", null] },
         creditLimit: { $ifNull: ["$credit.creditLimit", 0] },
         usedCredit: { $ifNull: ["$credit.usedCredit", 0] },
+        status: { $ifNull: ["$credit.status", "settled"] },
+        isActive: { $ifNull: ["$credit.isActive", false] },
+        hasCredit: {
+          $cond: { if: { $eq: ["$credit", null] }, then: false, else: true },
+        },
       },
+    },
+    {
+      $sort: { mineName: 1 },
     },
   ]);
 
-  return result;
+  return allMines;
 }
 
+// src/services/company-credit.ts
 export async function updateCompanyCreditService(
   companyId: string,
   mineId: string,
@@ -64,45 +82,75 @@ export async function updateCompanyCreditService(
   try {
     session.startTransaction();
 
+    // Get company
     const company = await Company.findById(companyId).session(session);
     if (!company) throw new Error("Company not found");
 
+    // Get company credit record (if exists)
     const companyCredit = await CompanyCredit.findOne({
       companyId,
       mineId,
     }).session(session);
-    if (!companyCredit) throw new Error("Company credit not found");
 
-    const debitBalance = company.debitAmount;
-    const creditBalance = companyCredit.creditLimit - companyCredit.usedCredit;
+    const debitBalance = company.debitAmount || 0;
+    const creditBalance = companyCredit
+      ? (companyCredit.creditLimit || 0) - (companyCredit.usedCredit || 0)
+      : 0;
+    const totalBalance = debitBalance + creditBalance;
 
-    if (debitBalance + creditBalance < data.amount) {
-      throw new Error("Insufficient funds");
+    if (totalBalance < data.amount) {
+      throw new Error(
+        `Insufficient funds. Available: R ${totalBalance.toFixed(2)}, Required: R ${data.amount.toFixed(2)}`,
+      );
     }
+
+    // Track old balances for trail
+    const oldTotalBalance = totalBalance;
 
     // Calculate how much to deduct from debit and credit
-    if (debitBalance >= data.amount) {
-      company.debitAmount -= data.amount;
-    } else {
-      company.debitAmount -= debitBalance;
-      companyCredit.usedCredit += data.amount - debitBalance;
+    let remainingAmount = data.amount;
+    let debitDeducted = 0;
+    let creditDeducted = 0;
+
+    // First deduct from debit balance
+    if (debitBalance > 0 && remainingAmount > 0) {
+      debitDeducted = Math.min(debitBalance, remainingAmount);
+      company.debitAmount = debitBalance - debitDeducted;
+      remainingAmount -= debitDeducted;
     }
 
-    const oldBalance = debitBalance + creditBalance;
-    const newBalance = oldBalance - data.amount;
+    // Then deduct from credit balance (if credit exists)
+    if (remainingAmount > 0 && companyCredit) {
+      creditDeducted = remainingAmount;
+      companyCredit.usedCredit =
+        (companyCredit.usedCredit || 0) + creditDeducted;
+      await companyCredit.save({ session });
+    } else if (remainingAmount > 0 && !companyCredit) {
+      // If no credit exists but still have remaining amount, this shouldn't happen
+      // because totalBalance check would have failed
+      throw new Error("Insufficient debit balance and no credit available");
+    }
 
+    const newDebitBalance = company.debitAmount;
+    const newCreditBalance = companyCredit
+      ? (companyCredit.creditLimit || 0) - (companyCredit.usedCredit || 0)
+      : 0;
+    const newTotalBalance = newDebitBalance + newCreditBalance;
+
+    // Save company updates
     await company.save({ session });
-    await companyCredit.save({ session });
 
-    await CompanyCreditTrail.create(
+    // Create account statement trail
+    await AccountStatementTrail.create(
       [
         {
           companyId: company._id,
+          mineId: new mongoose.Types.ObjectId(mineId),
           type: data.type,
           amount: data.amount,
-          oldBalance,
-          newBalance,
-          description: data.reason || "Credit updated via system",
+          oldBalance: oldTotalBalance,
+          newBalance: newTotalBalance,
+          description: data.reason || `Transaction: ${data.type}`,
         },
       ],
       { session },
@@ -111,7 +159,10 @@ export async function updateCompanyCreditService(
     await session.commitTransaction();
     session.endSession();
 
-    return { oldBalance, newBalance };
+    return {
+      oldBalance: oldTotalBalance,
+      newBalance: newTotalBalance,
+    };
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
