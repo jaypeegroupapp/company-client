@@ -3,9 +3,9 @@
 import { connectDB } from "@/lib/db";
 import Order from "@/models/order";
 import OrderItem from "@/models/order-item";
-import { verifySession } from "@/lib/dal";
 import { Types } from "mongoose";
 import { CreateOrderInput } from "@/definitions/order";
+import Tanker from "@/models/tanker";
 
 /**
  * ✅ Get all Orders for the logged-in user
@@ -56,6 +56,65 @@ export async function getOrderByIdService(id: string) {
 /**
  * ✅ Create a new Order and associated OrderItems
  */
+
+export async function getAvailableStockForProductService(productId: string) {
+  await connectDB();
+
+  // Get total tanker stock for this product
+  const tankerStockResult = await Tanker.aggregate([
+    {
+      $match: {
+        productId: new Types.ObjectId(productId),
+        isPublished: true,
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalStock: { $sum: "$stockLevel" },
+      },
+    },
+  ]);
+
+  const totalTankerStock = tankerStockResult[0]?.totalStock || 0;
+
+  // Get total accepted order quantity for this product
+  const acceptedOrdersResult = await Order.aggregate([
+    {
+      $match: {
+        productId: new Types.ObjectId(productId),
+        status: "accepted",
+      },
+    },
+    {
+      $lookup: {
+        from: "orderitems",
+        localField: "_id",
+        foreignField: "orderId",
+        as: "items",
+      },
+    },
+    { $unwind: "$items" },
+    {
+      $group: {
+        _id: null,
+        totalAccepted: { $sum: "$items.quantity" },
+      },
+    },
+  ]);
+
+  const totalAccepted = acceptedOrdersResult[0]?.totalAccepted || 0;
+
+  // Available stock = physical stock - reserved (accepted orders)
+  const availableStock = totalTankerStock - totalAccepted;
+
+  return {
+    totalTankerStock,
+    totalAccepted,
+    availableStock: Math.max(0, availableStock),
+  };
+}
+
 export async function createOrderService(data: CreateOrderInput) {
   await connectDB();
 
@@ -63,6 +122,21 @@ export async function createOrderService(data: CreateOrderInput) {
   session.startTransaction();
 
   try {
+    // Calculate total order quantity from items
+    const totalOrderQuantity = data.items.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
+
+    // Get available stock for this product
+    const stockInfo = await getAvailableStockForProductService(data.productId);
+
+    // Determine order status based on available stock
+    let orderStatus = "pending";
+    if (stockInfo.availableStock >= totalOrderQuantity) {
+      orderStatus = "accepted";
+    }
+
     // 1️⃣ Create main order
     const [order] = await Order.create(
       [
@@ -75,7 +149,7 @@ export async function createOrderService(data: CreateOrderInput) {
           debit: data.debit,
           credit: data.credit,
           collectionDate: new Date(data.collectionDate),
-          status: data.status || "pending",
+          status: orderStatus,
           sellingPrice: data.sellingPrice,
           purchasePrice: data.purchasePrice,
         },
@@ -88,7 +162,9 @@ export async function createOrderService(data: CreateOrderInput) {
       const orderItems = data.items.map((item) => ({
         orderId: order._id,
         truckId: new Types.ObjectId(item.truckId),
+        productId: new Types.ObjectId(data.productId),
         quantity: item.quantity,
+        status: orderStatus === "accepted" ? "accepted" : "pending",
       }));
 
       await OrderItem.insertMany(orderItems, { session });
@@ -97,7 +173,13 @@ export async function createOrderService(data: CreateOrderInput) {
     await session.commitTransaction();
     session.endSession();
 
-    return { success: true, orderId: order._id.toString() };
+    return {
+      success: true,
+      orderId: order._id.toString(),
+      status: orderStatus,
+      availableStock: stockInfo.availableStock,
+      totalOrderQuantity,
+    };
   } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
