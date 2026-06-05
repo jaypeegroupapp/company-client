@@ -340,3 +340,55 @@ export async function getMineInvoiceOrdersService(invoiceId: string) {
 
   return results;
 }
+
+export async function updateOrderPaymentStatus(
+  orderId: string,
+  paymentData: {
+    status: string;
+    paymentComplete: boolean;
+    pfPaymentId?: string;
+    amountPaid?: number;
+    paymentDate?: Date;
+    paymentMethod?: string;
+    paymentReference?: string;
+  },
+) {
+  await connectDB();
+
+  const updateData: any = {
+    status: paymentData.status,
+    paymentComplete: paymentData.paymentComplete,
+    updatedAt: new Date(),
+  };
+
+  if (paymentData.pfPaymentId) {
+    updateData.pfPaymentId = paymentData.pfPaymentId;
+  }
+  if (paymentData.amountPaid) {
+    updateData.amountPaid = paymentData.amountPaid;
+  }
+  if (paymentData.paymentDate) {
+    updateData.paymentDate = paymentData.paymentDate;
+  }
+  if (paymentData.paymentMethod) {
+    updateData.paymentMethod = paymentData.paymentMethod;
+  }
+  if (paymentData.paymentReference) {
+    updateData.paymentReference = paymentData.paymentReference;
+  }
+
+  const order = await Order.findByIdAndUpdate(orderId, updateData, {
+    new: true,
+  }).lean();
+
+  return order;
+}
+
+export async function updateOrder(orderId: string, status: string) {
+  await connectDB();
+  return await Order.findByIdAndUpdate(
+    orderId,
+    { status, updatedAt: new Date() },
+    { new: true },
+  ).lean();
+}

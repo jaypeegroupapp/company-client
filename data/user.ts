@@ -1,6 +1,8 @@
 import { verifySession } from "@/lib/dal";
 import { connectDB } from "@/lib/db";
+import Company from "@/models/company";
 import User from "@/models/user";
+import { Types } from "mongoose";
 import { cache } from "react";
 
 export const getUser = cache(async (userData: any) => {
@@ -14,11 +16,17 @@ export const getSessionUser = cache(async () => {
   if (!session) return null;
 
   const userId = session?.userId as string;
-  const user = (await User.findById(userId, "name email contactNumber")) as any;
-  if (!user) return null;
+  const company = (await Company.findOne({
+    userId: new Types.ObjectId(userId),
+  })) as any;
 
-  const { name, email, contactNumber } = user;
-  return { name, email, contactNumber };
+  if (!company) return null;
+
+  return {
+    name: company.name,
+    email: company.contactEmail,
+    contactNumber: company.contactPhone,
+  };
 });
 
 export const isUserExists = async (email: string) => {

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { createOrderAction } from "@/actions/order";
+import { createOrderAction, createPaymentUrlAction } from "@/actions/order";
 import { useRouter } from "next/navigation";
 import { ITruck } from "@/definitions/truck";
 import { IProduct } from "@/definitions/product";
 import CreditBalance from "./credit-balance";
 import { ICompanyCredit } from "@/definitions/company-credit";
+import { Wallet, CreditCard, AlertCircle } from "lucide-react";
 
 export function ReviewStep({
   selectedMine,
@@ -33,6 +34,7 @@ export function ReviewStep({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   if (!selectedMine || !selectedProduct) {
@@ -84,24 +86,20 @@ export function ReviewStep({
     }));
 
   // 🚨 BALANCE VALIDATION
-  const insufficientBalance = total > accountBalance;
+  const hasSufficientDebit = total <= debit.debitAmount;
+  const debitToUse = Math.min(total, debit.debitAmount);
+  const remainingAfterDebit = total - debitToUse;
+  const needsPaymentGateway = !hasSufficientDebit && remainingAfterDebit > 0;
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
       setMessage(null);
 
-      if (insufficientBalance) {
-        setMessage("❌ You do not have enough credit to complete this order.");
-        return;
-      }
-      let debitPaid = total;
-      let creditUsed = 0;
-
-      if (total > debit.debitAmount) {
-        debitPaid = debit.debitAmount;
-        creditUsed = total - debit.debitAmount;
-      }
+      // Only deduct the debit amount from company balance
+      const debitPaid = Math.min(total, debit.debitAmount);
+      const creditUsed =
+        total > debit.debitAmount ? total - debit.debitAmount : 0;
 
       const orderData = {
         mineId: selectedMine.mineId,
@@ -134,6 +132,61 @@ export function ReviewStep({
       setMessage("❌ Unexpected error occurred.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePaymentGateway = async () => {
+    try {
+      setPaymentLoading(true);
+      setMessage(null);
+
+      // Calculate how much needs to be paid via payment gateway
+      const debitPaid = Math.min(total, debit.debitAmount);
+      const amountToPay = total - debitPaid;
+      const creditUsed = 0; // No credit used when using payment gateway
+
+      const orderData = {
+        mineId: selectedMine.mineId,
+        productId: selectedProduct.id,
+        totalAmount: total,
+        collectionDate,
+        purchasePrice,
+        sellingPrice,
+        items: orderItems,
+        debit: debitPaid,
+        credit: creditUsed,
+      };
+
+      const formData = new FormData();
+      formData.append("orderData", JSON.stringify(orderData));
+
+      // Create order first
+      const result = await createOrderAction(formData);
+
+      if (!result?.message?.toLowerCase().includes("success")) {
+        setMessage(result?.message || "❌ Failed to create order");
+        setPaymentLoading(false);
+        return;
+      }
+
+      // Create payment URL for remaining amount
+      const paymentUrl = await createPaymentUrlAction(
+        result.orderId!,
+        amountToPay,
+        selectedProduct.name,
+      );
+
+      if (paymentUrl) {
+        // Redirect to payment gateway
+        window.location.href = paymentUrl;
+      } else {
+        setMessage("❌ Failed to initialize payment gateway");
+      }
+    } catch (error) {
+      console.error("Payment gateway error:", error);
+      setMessage("❌ Unexpected error occurred during payment setup.");
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -184,7 +237,17 @@ export function ReviewStep({
 
         {/* Collection Date */}
         <div>
-          <h3 className="font-medium text-gray-900">Collection Date</h3>
+          <div className="flex flex-row item-center gap-1">
+            <h3 className="font-medium text-gray-900">Collection Date </h3>
+            {collectionDate ? (
+              new Date(collectionDate).toLocaleDateString()
+            ) : (
+              <div className="flex justify-between text-orange-600 font-medium ">
+                {" "}
+                - Please select a date
+              </div>
+            )}
+          </div>
           <input
             type="date"
             value={collectionDate}
@@ -193,28 +256,64 @@ export function ReviewStep({
           />
         </div>
 
-        {/* Total price */}
-        <div className="pt-4 flex justify-between border-t border-gray-200">
-          <p className="text-sm text-gray-700">Total:</p>
-          <p className="text-lg font-semibold text-gray-900">
-            R {total.toFixed(2)}
-          </p>
+        {/* Payment Breakdown */}
+        <div className="pt-4 border-t border-gray-200 space-y-2">
+          <div className="flex justify-between">
+            <p className="text-sm text-gray-700">Total Amount:</p>
+            <p className="text-lg font-semibold text-gray-900">
+              R {total.toFixed(2)}
+            </p>
+          </div>
+          <div className="flex justify-between">
+            <p className="text-sm text-gray-700">Debit Balance Available:</p>
+            <p className="text-md font-medium text-gray-900">
+              R {debit.debitAmount.toFixed(2)}
+            </p>
+          </div>
+          {!hasSufficientDebit && (
+            <div className="flex justify-between text-orange-600">
+              <p className="text-sm">Debit to be used:</p>
+              <p className="text-md font-bold">R {debitToUse.toFixed(2)}</p>
+            </div>
+          )}
+          {needsPaymentGateway && (
+            <div className="flex justify-between text-blue-600">
+              <p className="text-sm">Remaining to Pay via Gateway:</p>
+              <p className="text-md font-bold">
+                R {remainingAfterDebit.toFixed(2)}
+              </p>
+            </div>
+          )}
         </div>
-
-        {/* ❌ Insufficient accountBalance error */}
-        {insufficientBalance && (
-          <p className="text-red-600 text-sm font-medium mt-2">
-            ❌ You do not have enough credit to place this order. (Available: R
-            {accountBalance.toFixed(2)} | Needed: R{total.toFixed(2)})
-          </p>
-        )}
       </div>
+
+      {/* Payment Gateway Info */}
+      {needsPaymentGateway && (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <CreditCard size={20} className="text-orange-600 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-orange-800">
+                Partial Payment Required
+              </p>
+              <p className="text-xs text-orange-700 mt-1">
+                Your debit balance of R {debit.debitAmount.toFixed(2)} will be
+                used first. The remaining amount of R{" "}
+                {remainingAfterDebit.toFixed(2)} needs to be paid via credit
+                card or EFT.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Status message */}
       {message && (
         <div
-          className={`text-center text-sm ${
-            message.includes("✅") ? "text-green-600" : "text-red-600"
+          className={`text-center text-sm p-3 rounded-lg ${
+            message.includes("✅")
+              ? "text-green-600 bg-green-50"
+              : "text-red-600 bg-red-50"
           }`}
         >
           {message}
@@ -222,26 +321,49 @@ export function ReviewStep({
       )}
 
       {/* Buttons */}
-      <div className="pt-4 flex justify-between">
+      <div className="pt-4 flex justify-between gap-3">
         <button
           onClick={onBack}
-          disabled={loading}
+          disabled={loading || paymentLoading}
           className="px-6 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100 transition"
         >
           Back
         </button>
 
-        <button
-          disabled={!collectionDate || loading || insufficientBalance}
-          onClick={handleSubmit}
-          className={`px-6 py-2 rounded-lg text-white font-medium transition ${
-            !collectionDate || loading || insufficientBalance
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gray-900 hover:bg-black"
-          }`}
-        >
-          {loading ? "Saving..." : "Confirm Order"}
-        </button>
+        <div className="flex gap-3">
+          {needsPaymentGateway ? (
+            <button
+              disabled={!collectionDate || paymentLoading}
+              onClick={handlePaymentGateway}
+              className={`px-6 py-2 rounded-lg text-white font-medium transition flex items-center gap-2 ${
+                !collectionDate || paymentLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-orange-600 hover:bg-orange-700"
+              }`}
+            >
+              {paymentLoading ? (
+                "Processing..."
+              ) : (
+                <>
+                  <CreditCard size={16} />
+                  Pay R {remainingAfterDebit.toFixed(2)}
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              disabled={!collectionDate || loading}
+              onClick={handleSubmit}
+              className={`px-6 py-2 rounded-lg text-white font-medium transition ${
+                !collectionDate || loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gray-900 hover:bg-black"
+              }`}
+            >
+              {loading ? "Saving..." : "Confirm Order"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,8 @@ import { orderFormSchema } from "@/validations/order";
 import { revalidatePath } from "next/cache";
 import { updateCollectionDateService } from "@/services/order";
 import { updateCompanyCreditService } from "@/services/company-credit";
+import { createPaymentUrl } from "@/lib/payfast";
+import { getSessionUser } from "@/data/user";
 
 export async function createOrderAction(formData: FormData) {
   try {
@@ -36,18 +38,24 @@ export async function createOrderAction(formData: FormData) {
     const userId = session.userId as string;
     const companyId = session.companyId as string;
 
-    // 1️⃣ Check company balance
-    const companyCredit = await updateCompanyCreditService(companyId, mineId, {
-      amount: totalAmount, // Deduct order total
-      reason: `Order payment for product ${productId}`,
-      type: "order-debit",
-    });
+    // 1️⃣ Check company balance (only deduct the debit amount, not full total)
+    if (debit > 0) {
+      const companyCredit = await updateCompanyCreditService(
+        companyId,
+        mineId,
+        {
+          amount: debit, // Only deduct the debit portion
+          reason: `Order payment for product ${productId}`,
+          type: "order-debit",
+        },
+      );
 
-    if (companyCredit.newBalance < 0) {
-      return {
-        message: "❌ Order total exceeds company account balance.",
-        errors: {},
-      };
+      if (companyCredit.newBalance < 0) {
+        return {
+          message: "❌ Order total exceeds company account balance.",
+          errors: {},
+        };
+      }
     }
 
     // 2️⃣ Create the order
@@ -67,11 +75,13 @@ export async function createOrderAction(formData: FormData) {
 
     if (!result.success) {
       // Rollback balance if order creation failed
-      await updateCompanyCreditService(companyId, mineId, {
-        amount: totalAmount, // Refund the amount
-        reason: `Rollback failed order ${result.orderId}`,
-        type: "credit-updated",
-      });
+      if (debit > 0) {
+        await updateCompanyCreditService(companyId, mineId, {
+          amount: debit, // Refund the amount
+          reason: `Rollback failed order ${result.orderId}`,
+          type: "credit-updated",
+        });
+      }
 
       return {
         message: "Failed to create order",
@@ -88,10 +98,9 @@ export async function createOrderAction(formData: FormData) {
     };
   }
 }
-
 export async function updateCollectionDateAction(
   orderId: string,
-  collectionDate: string
+  collectionDate: string,
 ) {
   try {
     const result = await updateCollectionDateService(orderId, collectionDate);
@@ -115,5 +124,22 @@ export async function deleteOrderAction(orderId: string) {
   } catch (error: any) {
     console.error("❌ deleteOrderAction error:", error);
     return { success: false, message: error.message };
+  }
+}
+
+export async function createPaymentUrlAction(
+  orderId: string,
+  amount: number,
+  productName: string,
+) {
+  try {
+    const user = await getSessionUser();
+
+    const paymentUrl = await createPaymentUrl(amount, productName, orderId);
+
+    return paymentUrl;
+  } catch (error) {
+    console.error("❌ createPaymentUrlAction error:", error);
+    return null;
   }
 }
