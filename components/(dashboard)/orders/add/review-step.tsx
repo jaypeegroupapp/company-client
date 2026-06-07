@@ -165,7 +165,7 @@ export function ReviewStep({
 
       if (!result?.message?.toLowerCase().includes("success")) {
         setMessage(result?.message || "❌ Failed to create order");
-        setPaymentLoading(false);
+
         return;
       }
 
@@ -186,7 +186,6 @@ export function ReviewStep({
       console.error("Payment gateway error:", error);
       setMessage("❌ Unexpected error occurred during payment setup.");
     } finally {
-      setPaymentLoading(false);
     }
   };
 

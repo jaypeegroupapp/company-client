@@ -1,5 +1,9 @@
 "use server";
-import { createOrderService, deleteOrderService } from "@/services/order";
+import {
+  createOrderService,
+  deleteMostRecentPendingOrderService,
+  deleteOrderService,
+} from "@/services/order";
 import { verifySession } from "@/lib/dal";
 import { orderFormSchema } from "@/validations/order";
 import { revalidatePath } from "next/cache";
@@ -141,5 +145,25 @@ export async function createPaymentUrlAction(
   } catch (error) {
     console.error("❌ createPaymentUrlAction error:", error);
     return null;
+  }
+}
+
+export async function deleteMostRecentPendingOrderAction() {
+  try {
+    // Get current user session
+    const session = await verifySession();
+    if (!session) return { message: "Unauthorized", errors: {} };
+
+    const userId = session.userId as string;
+    const result = await deleteMostRecentPendingOrderService(userId);
+
+    if (result.success) {
+      revalidatePath("/orders");
+    }
+
+    return result;
+  } catch (error: any) {
+    console.error("❌ deleteMostRecentPendingOrderAction error:", error);
+    return { success: false, message: error.message };
   }
 }

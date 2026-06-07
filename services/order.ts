@@ -209,7 +209,7 @@ export async function deleteOrderService(orderId: string) {
     await OrderItem.deleteMany({ orderId });
     await Order.findByIdAndDelete(orderId);
 
-    return { success: true };
+    return { success: true, message: "Order deleted successfully" };
   } catch (error: any) {
     console.error("❌ deleteOrderService error:", error);
     return { success: false, message: error.message };
@@ -391,4 +391,33 @@ export async function updateOrder(orderId: string, status: string) {
     { status, updatedAt: new Date() },
     { new: true },
   ).lean();
+}
+
+export async function deleteMostRecentPendingOrderService(userId: string) {
+  await connectDB();
+
+  try {
+    // Find the most recent pending or payment_pending order for this user
+    const order = await Order.findOne({
+      userId: new Types.ObjectId(userId),
+    }).sort({ createdAt: -1 });
+
+    if (!order) {
+      return { success: false, message: "No pending order found to delete" };
+    }
+
+    // Delete all order items first
+    await OrderItem.deleteMany({ orderId: order._id });
+
+    // Delete the order
+    await Order.findByIdAndDelete(order._id);
+
+    return {
+      success: true,
+      message: "Order deleted successfully",
+    };
+  } catch (error: any) {
+    console.error("❌ deleteMostRecentPendingOrderService error:", error);
+    return { success: false, message: error.message };
+  }
 }
