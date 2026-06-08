@@ -1,7 +1,9 @@
-// app/api/notify/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { updateOrder } from "@/services/order";
+import {
+  cancelOrderService,
+  confirmPaymentAndUpdateOrder,
+} from "@/services/order";
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +15,9 @@ export async function POST(req: Request) {
     const data: Record<string, string> = {};
     params.forEach((value, key) => (data[key] = value));
 
-    // 2️⃣ Rebuild signature string (alphabetical order, encode values)
+    console.log("📦 Payfast ITN received:", data);
+
+    // Build signature string
     let signatureString = Object.entries(data)
       .filter(([k]) => k !== "signature") // exclude signature from string
       .sort(([a], [b]) => a.localeCompare(b))
@@ -66,16 +70,15 @@ export async function POST(req: Request) {
     //   return NextResponse.json({ error: "Invalid ITN data" }, { status: 400 });
     // }
 
-    // 6️⃣ If we reach here, payment is verified ✅
     console.log("✅ Payfast Payment Verified:", data);
 
-    // 🔹 TODO: Update your order in DB (match data.m_payment_id or token)
-    // e.g. await markOrderAsPaid(data.m_payment_id, data.pf_payment_id);
-    let status = "";
-    if (data.payment_status === "COMPLETE") status = "complete";
-    else if (data.payment_status === "CANCELLED") status = "cancelled";
+    // Update order based on payment status
+    if (data.payment_status === "COMPLETE") {
+      await confirmPaymentAndUpdateOrder(data.m_payment_id);
+    } else if (data.payment_status === "CANCELLED") {
+      await cancelOrderService(data.m_payment_id, "Payment cancelled by user");
+    }
 
-    await updateOrder(data.m_payment_id, status);
     return NextResponse.json({ status: "success" }, { status: 200 });
   } catch (error) {
     console.error("❌ Error processing Payfast ITN:", error);

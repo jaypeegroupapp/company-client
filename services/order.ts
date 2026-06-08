@@ -115,6 +115,9 @@ export async function getAvailableStockForProductService(productId: string) {
   };
 }
 
+/**
+ * Main order creation function - handles all payment methods with backward compatibility
+ */
 export async function createOrderService(data: CreateOrderInput) {
   await connectDB();
 
@@ -122,22 +125,34 @@ export async function createOrderService(data: CreateOrderInput) {
   session.startTransaction();
 
   try {
-    // Calculate total order quantity from items
     const totalOrderQuantity = data.items.reduce(
       (sum, item) => sum + item.quantity,
       0,
     );
 
-    // Get available stock for this product
-    const stockInfo = await getAvailableStockForProductService(data.productId);
+    // Determine order status based on payment method
+    let orderStatus: string = "pending";
+    let paymentMethod = data.paymentMethod || "debit";
 
-    // Determine order status based on available stock
-    let orderStatus = "pending";
-    if (stockInfo.availableStock >= totalOrderQuantity) {
-      orderStatus = "accepted";
+    // Backward compatibility: check isPaymentGateway flag
+    if (data.isPaymentGateway) {
+      paymentMethod = "payment_gateway";
     }
 
-    // 1️⃣ Create main order
+    // Handle debit payment (immediate deduction from balance)
+    else if (paymentMethod === "credit" || paymentMethod === "debit") {
+      const stockInfo = await getAvailableStockForProductService(
+        data.productId,
+      );
+      orderStatus =
+        stockInfo.availableStock >= totalOrderQuantity ? "accepted" : "pending";
+    }
+    // Handle mixed payment (debit + gateway)
+    else if (paymentMethod === "payment_gateway" || paymentMethod === "mixed") {
+      orderStatus = "payment_pending";
+    }
+
+    // Create main order
     const [order] = await Order.create(
       [
         {
@@ -146,10 +161,11 @@ export async function createOrderService(data: CreateOrderInput) {
           companyId: new Types.ObjectId(data.companyId),
           productId: new Types.ObjectId(data.productId),
           totalAmount: data.totalAmount,
-          debit: data.debit,
-          credit: data.credit,
+          debit: data.debit || 0,
+          credit: data.credit || 0,
           collectionDate: new Date(data.collectionDate),
           status: orderStatus,
+          paymentMethod: paymentMethod,
           sellingPrice: data.sellingPrice,
           purchasePrice: data.purchasePrice,
         },
@@ -157,14 +173,19 @@ export async function createOrderService(data: CreateOrderInput) {
       { session },
     );
 
-    // 2️⃣ Create related order items
+    // Create order items
     if (data.items && data.items.length > 0) {
+      let itemStatus = "pending";
+      if (orderStatus === "accepted") {
+        itemStatus = "accepted";
+      }
+
       const orderItems = data.items.map((item) => ({
         orderId: order._id,
         truckId: new Types.ObjectId(item.truckId),
         productId: new Types.ObjectId(data.productId),
         quantity: item.quantity,
-        status: orderStatus === "accepted" ? "accepted" : "pending",
+        status: itemStatus,
       }));
 
       await OrderItem.insertMany(orderItems, { session });
@@ -177,8 +198,7 @@ export async function createOrderService(data: CreateOrderInput) {
       success: true,
       orderId: order._id.toString(),
       status: orderStatus,
-      availableStock: stockInfo.availableStock,
-      totalOrderQuantity,
+      paymentMethod: paymentMethod,
     };
   } catch (error: any) {
     await session.abortTransaction();
@@ -418,6 +438,101 @@ export async function deleteMostRecentPendingOrderService(userId: string) {
     };
   } catch (error: any) {
     console.error("❌ deleteMostRecentPendingOrderService error:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+export async function confirmPaymentAndUpdateOrder(orderId: string) {
+  await connectDB();
+
+  const session = await Order.startSession();
+  session.startTransaction();
+
+  try {
+    const order = await Order.findById(orderId).session(session);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    if (order.status !== "payment_pending") {
+      throw new Error(
+        `Order cannot be confirmed. Current status: ${order.status}`,
+      );
+    }
+
+    // Calculate total order quantity from items
+    const orderItems = await OrderItem.find({ orderId: order._id }).session(
+      session,
+    );
+    const totalOrderQuantity = orderItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
+
+    // Get available stock for this product
+    const stockInfo = await getAvailableStockForProductService(
+      order.productId.toString(),
+    );
+
+    // Determine order status based on available stock
+    let orderStatus = "pending";
+    if (stockInfo.availableStock >= totalOrderQuantity) {
+      orderStatus = "accepted";
+    }
+
+    // Update order status
+    order.status = orderStatus;
+    await order.save({ session });
+
+    // Update order items status
+    await OrderItem.updateMany(
+      { orderId: order._id },
+      { status: orderStatus === "accepted" ? "accepted" : "pending" },
+      { session },
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return { success: true, status: orderStatus };
+  } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("❌ confirmPaymentAndUpdateOrder error:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+export async function cancelOrderService(orderId: string, reason: string) {
+  await connectDB();
+
+  const session = await Order.startSession();
+  session.startTransaction();
+
+  try {
+    const order = await Order.findById(orderId).session(session);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    if (order.status !== "payment_pending") {
+      throw new Error(
+        `Order cannot be cancelled. Current status: ${order.status}`,
+      );
+    }
+
+    // Delete order items and order
+    await OrderItem.deleteMany({ orderId: order._id }, { session });
+    await Order.findByIdAndDelete(orderId, { session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return { success: true };
+  } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("❌ cancelOrderService error:", error);
     return { success: false, message: error.message };
   }
 }

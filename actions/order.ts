@@ -32,8 +32,9 @@ export async function createOrderAction(formData: FormData) {
       sellingPrice,
       purchasePrice,
       mineId,
-      debit,
-      credit,
+      debit = 0,
+      credit = 0,
+      isPaymentGateway = false, // Backward compatibility flag
     } = validated.data;
 
     const session = await verifySession();
@@ -42,7 +43,21 @@ export async function createOrderAction(formData: FormData) {
     const userId = session.userId as string;
     const companyId = session.companyId as string;
 
-    // 1️⃣ Check company balance (only deduct the debit amount, not full total)
+    // Determine payment method
+    let paymentMethod: "debit" | "credit" | "payment_gateway" | "mixed" =
+      "credit";
+
+    if (isPaymentGateway) {
+      paymentMethod = "payment_gateway";
+    } else if (debit > 0 && credit > 0) {
+      paymentMethod = "mixed";
+    } else if (debit > 0) {
+      paymentMethod = "debit";
+    } else if (credit > 0) {
+      paymentMethod = "credit";
+    }
+
+    // Handle debit payment - deduct from company balance immediately
     if (debit > 0) {
       const companyCredit = await updateCompanyCreditService(
         companyId,
@@ -75,13 +90,15 @@ export async function createOrderAction(formData: FormData) {
       purchasePrice,
       debit,
       credit,
+      paymentMethod,
+      isPaymentGateway, // Pass for backward compatibility
     });
 
     if (!result.success) {
-      // Rollback balance if order creation failed
+      // Rollback debit if order creation failed
       if (debit > 0) {
         await updateCompanyCreditService(companyId, mineId, {
-          amount: debit, // Refund the amount
+          amount: debit,
           reason: `Rollback failed order ${result.orderId}`,
           type: "credit-updated",
         });
@@ -93,7 +110,25 @@ export async function createOrderAction(formData: FormData) {
       };
     }
 
-    return { message: "Order created successfully", orderId: result.orderId };
+    // Return appropriate response based on payment method
+    let responseMessage = "Order created successfully";
+
+    if (paymentMethod === "payment_gateway") {
+      responseMessage = "Order created. Please complete payment to confirm.";
+    } else if (paymentMethod === "mixed") {
+      responseMessage = `Order created. Debit of R${debit} applied. Please pay remaining R${credit} via payment gateway.`;
+    } else if (paymentMethod === "debit") {
+      responseMessage = `Order created and confirmed. Debit of R${debit} applied.`;
+    } else if (paymentMethod === "credit") {
+      responseMessage = "Order created. Will be processed on credit terms.";
+    }
+
+    return {
+      message: responseMessage,
+      orderId: result.orderId,
+      status: result.status,
+      paymentMethod,
+    };
   } catch (error: any) {
     console.error("❌ createOrderAction error:", error);
     return {
@@ -102,6 +137,7 @@ export async function createOrderAction(formData: FormData) {
     };
   }
 }
+
 export async function updateCollectionDateAction(
   orderId: string,
   collectionDate: string,

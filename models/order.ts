@@ -85,8 +85,13 @@ const OrderSchema = new Schema<IOrderDoc>(
       type: String,
       required: false,
     },
+    paymentMethod: {
+      type: String,
+      enum: ["debit", "credit", "payment_gateway", "mixed"],
+      default: "credit",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Prevent model overwrite in dev mode
