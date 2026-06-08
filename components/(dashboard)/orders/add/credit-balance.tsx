@@ -17,9 +17,9 @@ export default function CreditBalance({
     : null;
 
   return (
-    <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-lg text-sm">
-      <Wallet size={16} className="text-gray-600" />
-      <span className="text-gray-700">
+    <div className="flex sm:items-center sm:justify-center gap-3 bg-gray-100 px-4 sm:px-3 py-2 rounded-lg text-sm">
+      <Wallet size={16} className="mt-1 text-gray-600" />
+      <span className="hidden sm:block text-gray-700">
         Debit Balance: <strong>R{debit.debitAmount.toFixed(2)}</strong>
         {creditBalance !== null && (
           <>
@@ -28,6 +28,18 @@ export default function CreditBalance({
           </>
         )}
       </span>
+      <div className="sm:hidden flex flex-col">
+        <span className="text-gray-700">
+          Debit Balance: <strong>R{debit.debitAmount.toFixed(2)}</strong>
+        </span>
+        <span className="text-gray-700">
+          {creditBalance !== null && (
+            <>
+              Credit Balance: <strong>R{creditBalance.toFixed(2)}</strong>
+            </>
+          )}
+        </span>
+      </div>
     </div>
   );
 }

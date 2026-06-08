@@ -4,7 +4,7 @@ const steps = ["Product", "Trucks", "Quantity", "Review"];
 
 export function StepIndicator({ step }: { step: number }) {
   return (
-    <div className="flex justify-between items-center mb-4 text-sm font-medium text-gray-700">
+    <div className="hidden sm:flex justify-between items-center mb-4 text-sm font-medium text-gray-700">
       {steps.map((label, i) => {
         const active = step === i + 1;
         const completed = step > i + 1;
@@ -16,8 +16,8 @@ export function StepIndicator({ step }: { step: number }) {
                 completed
                   ? "border-gray-800 bg-gray-800 text-white"
                   : active
-                  ? "border-gray-800 text-gray-800"
-                  : "border-gray-300 text-gray-400"
+                    ? "border-gray-800 text-gray-800"
+                    : "border-gray-300 text-gray-400"
               }`}
             >
               {i + 1}
@@ -27,8 +27,8 @@ export function StepIndicator({ step }: { step: number }) {
                 active
                   ? "text-gray-900"
                   : completed
-                  ? "text-gray-700"
-                  : "text-gray-400"
+                    ? "text-gray-700"
+                    : "text-gray-400"
               }`}
             >
               {label}

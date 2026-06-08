@@ -24,7 +24,7 @@ export function OrderSummary({
   setCollectionDate,
 }: OrderSummaryProps) {
   return (
-    <div className="border border-gray-200 rounded-xl p-6 space-y-4 bg-gray-50 shadow-sm">
+    <div className="border border-gray-200 rounded-xl p-4 sm:p-6 space-y-4 bg-gray-50 shadow-sm">
       {/* Mine Info */}
       <div>
         <h3 className="font-medium text-gray-900">Mine</h3>
@@ -70,7 +70,7 @@ export function OrderSummary({
 
       {/* Collection Date */}
       <div>
-        <div className="flex flex-row items-center gap-1">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
           <h3 className="font-medium text-gray-900">Collection Date</h3>
           {collectionDate ? (
             <span className="text-sm text-gray-600">

@@ -41,7 +41,7 @@ export function MineStep({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xl font-semibold">Select a Mine</h2>
         {/* Credit Info */}
         <CreditBalance debit={debit} selectedMine={selectedMine} />

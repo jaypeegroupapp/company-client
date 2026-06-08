@@ -52,7 +52,7 @@ export default function AddOrderClient({
           <h1 className="text-2xl font-semibold tracking-tight">
             Create New Order
           </h1>
-          <p className="text-sm text-gray-500 mt-1">{progressLabel}</p>
+          <p className="hidden sm:block text-sm text-gray-500 mt-1">{progressLabel}</p>
         </div>
 
         <div className="flex gap-2">

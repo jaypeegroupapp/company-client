@@ -77,7 +77,7 @@ export function QuantityStep({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xl font-semibold">Set Quantities</h2>
         <CreditBalance debit={debit} selectedMine={selectedMine} />
       </div>
@@ -93,7 +93,7 @@ export function QuantityStep({
               className="border border-gray-200 rounded-xl p-4"
             >
               {/* Truck Info */}
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="space-y-1">
                   <p className="font-medium text-gray-800">
                     {truck.plateNumber} - {truck.make} {truck.model} (
@@ -116,7 +116,7 @@ export function QuantityStep({
                       truck.tankSize,
                     )
                   }
-                  className={`w-28 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
+                  className={`w-full sm:w-28 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
                     error
                       ? "border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:ring-gray-700"
