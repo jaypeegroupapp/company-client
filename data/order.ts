@@ -37,22 +37,42 @@ export async function getOrders() {
  */
 export async function getOrderById(id: string) {
   try {
-    const order = await getOrderByIdService(id);
+    const order = (await getOrderByIdService(id)) as any;
     if (!order) return null;
 
-    // 🧾 Map items cleanly
     const items = order.items.map((item: any) => ({
-      id: item._id.toString(),
-      truckId: item.truckId?._id?.toString() || "",
-      truckName: item.truckId?.plateNumber || "Unknown Truck",
-      truckRegistration: item.truckId?.registrationNumber || "",
-      quantity: Number(item.quantity || 0),
+      id: item._id?.toString() || item.id,
+      plateNumber:
+        item.truck?.plateNumber || item.truckId?.plateNumber || "Unknown",
+      make: item.truck?.make || item.truckId?.make,
+      model: item.truck?.model || item.truckId?.model,
+      year: item.truck?.year || item.truckId?.year,
+      companyName: item.truck?.companyName || item.truckId?.companyName,
+      productName: item.product?.name || item.productId?.name,
+      quantity: Number(item.quantity),
+      price: Number(item.price),
+      status: item.status,
+      signature: item.signature,
+      dispenserName: item.dispenser?.name || item.dispenserId?.name,
+      attendantName:
+        item.attendance?.attendantId?.userId?.name ||
+        item.attendance?.attendantId?.name,
+      completedAt: item.status === "completed" ? item.updatedAt : null,
     }));
 
-    // 🧱 Return serializable structure
     return {
-      ...mapOrder(order),
-      items,
+      id: order.id,
+      orderNumber:
+        order.orderNumber || order._id?.toString().slice(-8).toUpperCase(),
+      companyName: order.company?.name || order.companyId?.name,
+      productId: order.productId?.toString(),
+      productName: order.product?.name || order.productId?.name,
+      totalAmount: order.totalAmount,
+      sellingPrice: order.sellingPrice,
+      status: order.status,
+      createdAt: order.createdAt,
+      collectionDate: order.collectionDate,
+      items: items,
     };
   } catch (err) {
     console.error("❌ getOrderById error:", err);

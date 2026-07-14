@@ -1,10 +1,24 @@
 export interface IOrderItem {
   id?: string;
-  orderId: string;
-  truckId: string;
+  orderId: Types.ObjectId | string;
+  productId: Types.ObjectId | string;
+  truckId: Types.ObjectId | string;
   quantity: number;
+  price: number;
+  status: "pending" | "accepted" | "completed" | "cancelled" | "returned";
   signature?: string;
-  status: "pending" | "accepted" | "completed" | "restock" | "cancelled";
+  dispenserId?: Types.ObjectId | string; // Add this
+  attendanceId?: Types.ObjectId | string; // Add this
+  // Return fields
+  isReturned?: boolean;
+  returnedAt?: Date;
+  returnedReason?: string;
+  returnedBy?: Types.ObjectId | string;
+  refundProcessed?: boolean;
+  refundProcessedAt?: Date;
+  refundProcessedBy?: Types.ObjectId | string;
+  stockRestored?: boolean;
+  stockRestoredAt?: Date;
   createdAt?: string;
   updatedAt?: string;
 }
