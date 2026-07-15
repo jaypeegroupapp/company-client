@@ -4,7 +4,6 @@ export interface IOrderItem {
   productId: Types.ObjectId | string;
   truckId: Types.ObjectId | string;
   quantity: number;
-  price: number;
   status: "pending" | "accepted" | "completed" | "cancelled" | "returned";
   signature?: string;
   dispenserId?: Types.ObjectId | string; // Add this

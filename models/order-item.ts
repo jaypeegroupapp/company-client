@@ -26,7 +26,6 @@ const OrderItemSchema = new Schema<IOrderItemDoc>(
     },
     productId: { type: Schema.Types.ObjectId, ref: Product.modelName },
     quantity: { type: Number, required: true },
-    price: { type: Number, required: true },
     status: {
       type: String,
       enum: ["pending", "accepted", "completed", "cancelled", "returned"],
