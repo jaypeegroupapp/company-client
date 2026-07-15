@@ -172,7 +172,7 @@ function OrderItemPriceInfo({
         </div>
       </div>
       {/* Delete button for pending orders */}
-      {isPending && (item.status === "pending" || item.status === "accepted") && (
+      {(isPending || item.status === "accepted") && (
         <button
           onClick={() => setShowDeleteModal(true)}
           className="p-1 rounded-full text-red-500 hover:bg-red-50 transition cursor-pointer"
