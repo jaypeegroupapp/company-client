@@ -201,7 +201,7 @@ export async function createOrderService(data: CreateOrderInput) {
     }
 
     // Handle debit payment (immediate deduction from balance)
-    if (paymentMethod === "credit" || paymentMethod === "debit") {
+    else if (paymentMethod === "credit" || paymentMethod === "debit") {
       const stockInfo = await getAvailableStockForProductService(
         data.productId,
       );
