@@ -78,7 +78,7 @@ const OrderSchema = new Schema<IOrderDoc>(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "completed", "restock", "cancelled"],
+      enum: ["pending", "accepted", "completed", "restock", "cancelled", "payment_pending"],
       default: "pending",
     },
     reason: {
